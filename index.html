@@ -6,6 +6,7 @@
 <title>Wishful</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -16,12 +17,28 @@
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-#app{max-width:420px;margin:0 auto;padding-bottom:80px;}
+#authView{max-width:380px;margin:0 auto;padding:60px 24px;}
+.auth-logo{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:400;letter-spacing:1px;margin-bottom:6px;}
+.auth-sub{font-size:12px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:40px;}
+.auth-tabs{display:flex;border:1px solid var(--border);border-radius:var(--radiusS);overflow:hidden;margin-bottom:24px;}
+.auth-tab{flex:1;padding:10px;text-align:center;font-size:13px;cursor:pointer;background:var(--surface);color:var(--text2);transition:all .15s;}
+.auth-tab.active{background:var(--text);color:var(--bg);}
+.auth-field{margin-bottom:14px;}
+.auth-field label{font-size:11px;color:var(--text2);display:block;margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;}
+.auth-field input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--radiusS);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .15s;}
+.auth-field input:focus{border-color:var(--accent);}
+.auth-btn{width:100%;padding:13px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radiusS);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:6px;transition:background .15s;}
+.auth-btn:hover{background:var(--accent-dark);}
+.auth-err{font-size:12px;color:#DC2626;margin-top:10px;text-align:center;min-height:18px;}
 
-.header{padding:28px 20px 10px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--border);}
-.logo-name{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:400;letter-spacing:1px;color:var(--text);line-height:1;}
-.logo-sub{font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
-.header-count{font-size:13px;color:var(--text3);}
+#appView{display:none;max-width:420px;margin:0 auto;padding-bottom:80px;}
+
+.header{padding:24px 20px 10px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--border);}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:400;letter-spacing:1px;line-height:1;}
+.logo-sub{font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-count{font-size:12px;color:var(--text3);}
+.logout-btn{font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;}
 
 .fab{position:fixed;bottom:24px;right:24px;z-index:100;}
 .fab-main{width:50px;height:50px;border-radius:50%;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:transform .15s,background .15s;}
@@ -54,7 +71,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .detail-view{display:none;}
 .detail-view.active{display:block;}
 .home-view.hidden{display:none;}
-
 .detail-header{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
 .back-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text);}
 .detail-title{font-family:'Cormorant Garamond',serif;font-size:20px;flex:1;}
@@ -123,27 +139,56 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .modal-actions{display:flex;gap:10px;margin-top:20px;}
 .btn-primary{flex:1;padding:12px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radiusS);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;}
 .btn-primary:hover{background:var(--accent-dark);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
 .btn-secondary{padding:12px 18px;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--radiusS);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;}
 
+.loading{text-align:center;padding:40px;color:var(--text3);font-size:13px;}
 .empty{text-align:center;padding:52px 20px;color:var(--text3);}
 .empty .e-icon{font-size:32px;margin-bottom:12px;opacity:.5;}
 .empty p{font-size:13px;line-height:1.8;}
 
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 22px;border-radius:20px;font-size:13px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div id="app">
+
+<div id="authView">
+  <div class="auth-logo">Wishful</div>
+  <div class="auth-sub">Le tue wishlist</div>
+  <div class="auth-tabs">
+    <div class="auth-tab active" onclick="switchTab('login')">Accedi</div>
+    <div class="auth-tab" onclick="switchTab('signup')">Registrati</div>
+  </div>
+  <div class="auth-field">
+    <label>Email</label>
+    <input type="email" id="authEmail" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')authSubmit()">
+  </div>
+  <div class="auth-field">
+    <label>Password</label>
+    <input type="password" id="authPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()">
+  </div>
+  <button class="auth-btn" id="authBtn" onclick="authSubmit()">Accedi</button>
+  <div class="auth-err" id="authErr"></div>
+</div>
+
+<div id="appView">
   <div class="home-view" id="homeView">
     <div class="header">
       <div>
         <div class="logo-name">Wishful</div>
         <div class="logo-sub">Le tue wishlist</div>
       </div>
-      <div class="header-count" id="totalBadge"></div>
+      <div class="header-right">
+        <span class="header-count" id="totalBadge"></span>
+        <button class="logout-btn" onclick="logout()">Esci</button>
+      </div>
     </div>
     <div class="section-label">Wishlist</div>
+    <div id="wlLoading" class="loading">Caricamento...</div>
     <div class="wl-list" id="wlList"></div>
     <div id="wlEmpty" class="empty" style="display:none;">
       <div class="e-icon">✦</div>
@@ -156,7 +201,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="back-btn" onclick="goHome()">←</button>
       <div id="detailIcon" style="font-size:20px;"></div>
       <div class="detail-title" id="detailTitle"></div>
-      <button class="share-btn" onclick="shareList()" title="Condividi">⎙</button>
+      <button class="share-btn" onclick="shareList()">⎙</button>
     </div>
     <div class="sort-bar">
       <div class="sort-chip active" onclick="setSort(this,'newest')">Recenti</div>
@@ -166,26 +211,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="sort-chip" onclick="setSort(this,'prio-asc')">Priorità ↑</div>
       <div class="sort-chip" onclick="setSort(this,'prio-desc')">Priorità ↓</div>
     </div>
+    <div id="desireLoading" class="loading" style="display:none;">Caricamento...</div>
     <div class="desire-list" id="desireList"></div>
     <div id="desireEmpty" class="empty" style="display:none;">
       <div class="e-icon">♡</div>
       <p>Nessun desiderio ancora.<br>Aggiungine uno con il tasto +</p>
     </div>
   </div>
-</div>
 
-<div class="fab">
-  <div class="fab-menu" id="fabMenu">
-    <div class="fab-item" onclick="openModal('desire')">
-      <span class="lbl">Nuovo desiderio</span>
-      <div class="ic">♡</div>
+  <div class="fab">
+    <div class="fab-menu" id="fabMenu">
+      <div class="fab-item" onclick="openModal('desire')">
+        <span class="lbl">Nuovo desiderio</span>
+        <div class="ic">♡</div>
+      </div>
+      <div class="fab-item" onclick="openModal('wishlist')">
+        <span class="lbl">Nuova wishlist</span>
+        <div class="ic">✦</div>
+      </div>
     </div>
-    <div class="fab-item" onclick="openModal('wishlist')">
-      <span class="lbl">Nuova wishlist</span>
-      <div class="ic">✦</div>
-    </div>
+    <button class="fab-main" id="fabBtn" onclick="toggleFab()">+</button>
   </div>
-  <button class="fab-main" id="fabBtn" onclick="toggleFab()">+</button>
 </div>
 
 <!-- MODAL WISHLIST -->
@@ -231,7 +277,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('overlayWL')">Annulla</button>
-      <button class="btn-primary" onclick="saveWishlist()">Salva</button>
+      <button class="btn-primary" id="wlSaveBtn" onclick="saveWishlist()">Salva</button>
     </div>
   </div>
 </div>
@@ -297,7 +343,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('overlayD')">Annulla</button>
-      <button class="btn-primary" onclick="saveDesire()">Salva</button>
+      <button class="btn-primary" id="dSaveBtn" onclick="saveDesire()">Salva</button>
     </div>
   </div>
 </div>
@@ -305,33 +351,98 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <div class="toast" id="toast"></div>
 
 <script>
+const SUPABASE_URL='https://gcxrootmhemvlvcpcydn.supabase.co';
+const SUPABASE_KEY='sb_publishable_bZRBU4kXiEsc19c5kZJFrQ_Hs8RkjcH';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 const ICONS=[
   {e:'📚',l:'Libri'},{e:'✈️',l:'Viaggi'},{e:'👗',l:'Moda'},{e:'💄',l:'Beauty'},
   {e:'🎮',l:'Gaming'},{e:'🏠',l:'Casa'},{e:'🍽️',l:'Cibo'},{e:'🎵',l:'Musica'},
   {e:'🌿',l:'Natura'},{e:'💻',l:'Tech'},{e:'🎨',l:'Arte'},{e:'🐾',l:'Animali'}
 ];
-let wls=JSON.parse(localStorage.getItem('wishful_wl')||'[]');
-let desires=JSON.parse(localStorage.getItem('wishful_d')||'[]');
-let editingWL=null,editingD=null,currentWL=null,currentSort='newest';
-let wlPrio='medio',dPrio='medio',selIcon=ICONS[0].e,fabOpen=false;
-let wlImgData='',dImgData='';
-let isBook=false;
 
-function save(){
-  localStorage.setItem('wishful_wl',JSON.stringify(wls));
-  localStorage.setItem('wishful_d',JSON.stringify(desires));
+let currentUser=null,wls=[],desires=[],editingWL=null,editingD=null;
+let currentWL=null,currentSort='newest',fabOpen=false;
+let wlPrio='medio',dPrio='medio',selIcon=ICONS[0].e;
+let wlImgData='',dImgData='',isBook=false;
+let authMode='login';
+
+function switchTab(mode){
+  authMode=mode;
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(mode==='login'&&i===0)||(mode==='signup'&&i===1)));
+  document.getElementById('authBtn').textContent=mode==='login'?'Accedi':'Registrati';
+  document.getElementById('authErr').textContent='';
 }
 
-function handleImgUpload(input,previewId,ctx){
-  const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const prev=document.getElementById(previewId);
-    prev.src=e.target.result;prev.style.display='block';
-    if(ctx==='wl')wlImgData=e.target.result;
-    else dImgData=e.target.result;
-  };
-  reader.readAsDataURL(file);
+async function authSubmit(){
+  const email=document.getElementById('authEmail').value.trim();
+  const password=document.getElementById('authPassword').value;
+  const btn=document.getElementById('authBtn');
+  const err=document.getElementById('authErr');
+  if(!email||!password){err.textContent='Compila tutti i campi';return;}
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>'+(authMode==='login'?'Accesso...':'Registrazione...');
+  err.textContent='';
+  const result=authMode==='login'
+    ?await sb.auth.signInWithPassword({email,password})
+    :await sb.auth.signUp({email,password});
+  btn.disabled=false;
+  btn.textContent=authMode==='login'?'Accedi':'Registrati';
+  if(result.error){
+    const msgs={'Invalid login credentials':'Email o password errati','Email not confirmed':'Controlla la email per confermare','User already registered':'Email già registrata, prova ad accedere'};
+    err.textContent=msgs[result.error.message]||result.error.message;
+    return;
+  }
+  if(authMode==='signup'&&!result.data.session){
+    err.style.color='#15803D';
+    err.textContent='Registrazione completata! Controlla la email per confermare.';
+    return;
+  }
+  if(result.data.user){currentUser=result.data.user;showApp();}
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  currentUser=null;wls=[];desires=[];
+  document.getElementById('appView').style.display='none';
+  document.getElementById('authView').style.display='block';
+  document.getElementById('authEmail').value='';
+  document.getElementById('authPassword').value='';
+}
+
+function showApp(){
+  document.getElementById('authView').style.display='none';
+  document.getElementById('appView').style.display='block';
+  loadWishlists();
+}
+
+async function loadWishlists(){
+  document.getElementById('wlLoading').style.display='block';
+  document.getElementById('wlList').innerHTML='';
+  document.getElementById('wlEmpty').style.display='none';
+  const {data,error}=await sb.from('wishlists').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  document.getElementById('wlLoading').style.display='none';
+  if(error){showToast('Errore caricamento');return;}
+  wls=data||[];
+  await loadAllDesires();
+  renderHome();
+}
+
+async function loadAllDesires(){
+  if(!wls.length){desires=[];return;}
+  const ids=wls.map(w=>w.id);
+  const {data}=await sb.from('desires').select('*').in('wishlist_id',ids);
+  desires=data||[];
+}
+
+async function loadDesires(wlId){
+  document.getElementById('desireLoading').style.display='block';
+  document.getElementById('desireList').innerHTML='';
+  document.getElementById('desireEmpty').style.display='none';
+  const {data}=await sb.from('desires').select('*').eq('wishlist_id',wlId).order('created_at',{ascending:false});
+  document.getElementById('desireLoading').style.display='none';
+  desires=desires.filter(d=>d.wishlist_id!==wlId).concat(data||[]);
+  renderDetail();
 }
 
 function renderHome(){
@@ -342,8 +453,8 @@ function renderHome(){
   if(!count){list.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   list.innerHTML=wls.map(w=>{
-    const dc=desires.filter(d=>d.wlId===w.id).length;
-    const imgSrc=w.imgData||w.imgUrl||'';
+    const dc=desires.filter(d=>d.wishlist_id===w.id).length;
+    const imgSrc=w.img_data||w.img_url||'';
     const iconContent=imgSrc?`<img src="${imgSrc}" onerror="this.style.display='none'">`:`${w.icon}`;
     return`<div class="wl-row" id="row-${w.id}">
       <div class="swipe-actions">
@@ -353,14 +464,14 @@ function renderHome(){
       <div class="wl-card" onclick="openDetail('${w.id}')" data-rowid="${w.id}">
         <div class="wl-icon">${iconContent}</div>
         <div class="wl-info">
-          <div class="wl-name">${w.name}</div>
+          <div class="wl-name">${escHtml(w.name)}</div>
           <div class="wl-meta">
             <span>${dc} ${dc===1?'desiderio':'desideri'}</span>
-            <span class="vis-dot ${w.pub?'vis-pub':'vis-priv'}"></span>
-            <span>${w.pub?'pubblica':'privata'}</span>
+            <span class="vis-dot ${w.is_public?'vis-pub':'vis-priv'}"></span>
+            <span>${w.is_public?'pubblica':'privata'}</span>
           </div>
         </div>
-        <span class="wl-prio">${w.prio}</span>
+        <span class="wl-prio">${w.priority}</span>
       </div>
     </div>`;
   }).join('');
@@ -371,16 +482,16 @@ function renderDetail(){
   const w=wls.find(x=>x.id===currentWL);if(!w)return;
   document.getElementById('detailTitle').textContent=w.name;
   document.getElementById('detailIcon').textContent=w.icon;
-  let ds=sortDesires(desires.filter(d=>d.wlId===currentWL));
+  let ds=sortDesires(desires.filter(d=>d.wishlist_id===currentWL));
   const list=document.getElementById('desireList');
   const empty=document.getElementById('desireEmpty');
   if(!ds.length){list.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   list.innerHTML=ds.map(d=>{
-    const imgSrc=d.imgData||d.imgUrl||'';
+    const imgSrc=d.img_data||d.img_url||'';
     const imgContent=imgSrc?`<img src="${imgSrc}" onerror="this.textContent='♡'">`:'♡';
     const priceStr=d.price?`€${parseFloat(d.price).toFixed(2)}`:'';
-    const bookStr=d.isBook&&d.author?`${d.author}${d.publisher?' · '+d.publisher:''}`:'';
+    const bookStr=d.is_book&&d.author?`${escHtml(d.author)}${d.publisher?' · '+escHtml(d.publisher):''}`:'';
     return`<div class="desire-row" id="drow-${d.id}">
       <div class="swipe-actions">
         <div class="sw-btn sw-edit" onclick="editDesire('${d.id}')"><span>✎</span><span>Modifica</span></div>
@@ -389,11 +500,11 @@ function renderDetail(){
       <div class="desire-card" data-rowid="${d.id}">
         <div class="desire-img">${imgContent}</div>
         <div class="desire-info">
-          <div class="desire-name">${d.name}</div>
+          <div class="desire-name">${escHtml(d.name)}</div>
           ${bookStr?`<div class="desire-book">${bookStr}</div>`:''}
           <div class="desire-sub">${[priceStr,d.link?'<a href="'+d.link+'" style="color:var(--accent)">Link ↗</a>':''].filter(Boolean).join(' · ')}</div>
         </div>
-        <span class="prio-badge prio-${d.prio}">${d.prio}</span>
+        <span class="prio-badge prio-${d.priority}">${d.priority}</span>
       </div>
     </div>`;
   }).join('');
@@ -403,12 +514,12 @@ function renderDetail(){
 function sortDesires(ds){
   const pMap={alto:3,medio:2,basso:1};
   return ds.slice().sort((a,b)=>{
-    if(currentSort==='newest')return b.ts-a.ts;
-    if(currentSort==='oldest')return a.ts-b.ts;
+    if(currentSort==='newest')return new Date(b.created_at)-new Date(a.created_at);
+    if(currentSort==='oldest')return new Date(a.created_at)-new Date(b.created_at);
     if(currentSort==='price-asc')return (parseFloat(a.price)||0)-(parseFloat(b.price)||0);
     if(currentSort==='price-desc')return (parseFloat(b.price)||0)-(parseFloat(a.price)||0);
-    if(currentSort==='prio-asc')return pMap[a.prio]-pMap[b.prio];
-    if(currentSort==='prio-desc')return pMap[b.prio]-pMap[a.prio];
+    if(currentSort==='prio-asc')return (pMap[a.priority]||2)-(pMap[b.priority]||2);
+    if(currentSort==='prio-desc')return (pMap[b.priority]||2)-(pMap[a.priority]||2);
     return 0;
   });
 }
@@ -424,7 +535,7 @@ function openDetail(id){
   document.getElementById('homeView').classList.add('hidden');
   document.getElementById('detailView').classList.add('active');
   document.querySelectorAll('.sort-chip').forEach((c,i)=>c.classList.toggle('active',i===0));
-  renderDetail();
+  loadDesires(id);
 }
 
 function goHome(){
@@ -470,6 +581,17 @@ function toggleBookFields(){
   document.getElementById('bookFields').classList.toggle('open',isBook);
 }
 
+function handleImgUpload(input,previewId,ctx){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const prev=document.getElementById(previewId);
+    prev.src=e.target.result;prev.style.display='block';
+    if(ctx==='wl')wlImgData=e.target.result;else dImgData=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function buildIconPicker(){
   document.getElementById('iconPicker').innerHTML=ICONS.map(i=>
     `<div class="icon-opt${i.e===selIcon?' selected':''}" title="${i.l}" onclick="pickIcon(this,'${i.e}')">${i.e}</div>`
@@ -490,68 +612,71 @@ function selPrio(el,ctx){
 }
 
 function clearPrio(ctx){
-  const sel=ctx==='wl'?'#overlayWL':'#overlayD';
-  document.querySelectorAll(sel+' .prio-opt').forEach(x=>{x.className='prio-opt';});
+  document.querySelectorAll((ctx==='wl'?'#overlayWL':'#overlayD')+' .prio-opt').forEach(x=>{x.className='prio-opt';});
 }
 
 function fillWLSelect(preselect){
   const sel=document.getElementById('dWishlist');
   sel.innerHTML=wls.length
-    ?wls.map(w=>`<option value="${w.id}"${w.id===preselect?' selected':''}>${w.icon} ${w.name}</option>`).join('')
+    ?wls.map(w=>`<option value="${w.id}"${w.id===preselect?' selected':''}>${w.icon} ${escHtml(w.name)}</option>`).join('')
     :'<option value="">— Crea prima una wishlist —</option>';
 }
 
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
-function saveWishlist(){
+async function saveWishlist(){
   const name=document.getElementById('wlName').value.trim();
   if(!name){showToast('Inserisci un nome');return;}
-  const obj={
-    id:editingWL||Date.now().toString(),name,icon:selIcon,
-    imgData:wlImgData,imgUrl:document.getElementById('wlImgUrl').value.trim(),
-    desc:document.getElementById('wlDesc').value.trim(),
-    prio:wlPrio,pub:document.getElementById('wlToggle').classList.contains('on'),
-    ts:Date.now()
-  };
-  if(editingWL){const i=wls.findIndex(x=>x.id===editingWL);if(i>-1){obj.ts=wls[i].ts;wls[i]=obj;}}
-  else wls.push(obj);
-  save();renderHome();closeModal('overlayWL');
+  const btn=document.getElementById('wlSaveBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Salvo...';
+  const obj={name,icon:selIcon,img_data:wlImgData||null,img_url:document.getElementById('wlImgUrl').value.trim()||null,description:document.getElementById('wlDesc').value.trim()||null,priority:wlPrio,is_public:document.getElementById('wlToggle').classList.contains('on'),user_id:currentUser.id};
+  let error;
+  if(editingWL){
+    ({error}=await sb.from('wishlists').update(obj).eq('id',editingWL));
+    if(!error){const i=wls.findIndex(x=>x.id===editingWL);if(i>-1)wls[i]={...wls[i],...obj};}
+  } else {
+    const {data,error:e}=await sb.from('wishlists').insert(obj).select().single();
+    error=e;if(!error&&data)wls.unshift(data);
+  }
+  btn.disabled=false;btn.textContent='Salva';
+  if(error){showToast('Errore: '+error.message);return;}
+  renderHome();closeModal('overlayWL');
 }
 
-function saveDesire(){
+async function saveDesire(){
   const name=document.getElementById('dName').value.trim();
   const wlId=document.getElementById('dWishlist').value;
   if(!name){showToast('Inserisci un nome');return;}
   if(!wlId){showToast('Seleziona una wishlist');return;}
-  const existing=editingD?desires.find(x=>x.id===editingD):null;
-  const obj={
-    id:editingD||Date.now().toString(),name,
-    imgData:dImgData,imgUrl:document.getElementById('dImg').value.trim(),
-    link:document.getElementById('dLink').value.trim(),
-    wlId,prio:dPrio,price:document.getElementById('dPrice').value,
-    pub:document.getElementById('dToggle').classList.contains('on'),
-    isBook,author:document.getElementById('dAuthor').value.trim(),
-    publisher:document.getElementById('dPublisher').value.trim(),
-    ts:existing?existing.ts:Date.now()
-  };
-  if(editingD){const i=desires.findIndex(x=>x.id===editingD);if(i>-1)desires[i]=obj;}
-  else desires.push(obj);
-  save();
+  const btn=document.getElementById('dSaveBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Salvo...';
+  const priceVal=document.getElementById('dPrice').value;
+  const obj={name,img_data:dImgData||null,img_url:document.getElementById('dImg').value.trim()||null,link:document.getElementById('dLink').value.trim()||null,wishlist_id:wlId,priority:dPrio,price:priceVal?parseFloat(priceVal):null,is_public:document.getElementById('dToggle').classList.contains('on'),is_book:isBook,author:document.getElementById('dAuthor').value.trim()||null,publisher:document.getElementById('dPublisher').value.trim()||null,user_id:currentUser.id};
+  let error;
+  if(editingD){
+    ({error}=await sb.from('desires').update(obj).eq('id',editingD));
+    if(!error){const i=desires.findIndex(x=>x.id===editingD);if(i>-1)desires[i]={...desires[i],...obj};}
+  } else {
+    const {data,error:e}=await sb.from('desires').insert(obj).select().single();
+    error=e;if(!error&&data)desires.unshift(data);
+  }
+  btn.disabled=false;btn.textContent='Salva';
+  if(error){showToast('Errore: '+error.message);return;}
   if(currentWL)renderDetail(); else renderHome();
   closeModal('overlayD');
 }
 
 function editWL(id){
   const w=wls.find(x=>x.id===id);if(!w)return;
-  editingWL=id;selIcon=w.icon;wlPrio=w.prio;wlImgData=w.imgData||'';
+  editingWL=id;selIcon=w.icon;wlPrio=w.priority;wlImgData=w.img_data||'';
   document.getElementById('wlModalTitle').textContent='Modifica wishlist';
   document.getElementById('wlName').value=w.name;
-  document.getElementById('wlDesc').value=w.desc||'';
-  document.getElementById('wlImgUrl').value=w.imgUrl||'';
+  document.getElementById('wlDesc').value=w.description||'';
+  document.getElementById('wlImgUrl').value=w.img_url||'';
   const prev=document.getElementById('wlPreview');
-  const src=wlImgData||w.imgUrl||'';
+  const src=wlImgData||w.img_url||'';
   if(src){prev.src=src;prev.style.display='block';}else prev.style.display='none';
-  document.getElementById('wlToggle').classList.toggle('on',!!w.pub);
+  document.getElementById('wlToggle').classList.toggle('on',!!w.is_public);
   buildIconPicker();clearPrio('wl');
   document.querySelector(`#overlayWL .prio-opt[data-p="${wlPrio}"]`)?.classList.add('sel-'+wlPrio);
   document.getElementById('overlayWL').classList.add('open');
@@ -560,10 +685,10 @@ function editWL(id){
 
 function editDesire(id){
   const d=desires.find(x=>x.id===id);if(!d)return;
-  editingD=id;dPrio=d.prio;dImgData=d.imgData||'';isBook=d.isBook||false;
+  editingD=id;dPrio=d.priority;dImgData=d.img_data||'';isBook=d.is_book||false;
   document.getElementById('dModalTitle').textContent='Modifica desiderio';
   document.getElementById('dName').value=d.name;
-  document.getElementById('dImg').value=d.imgUrl||'';
+  document.getElementById('dImg').value=d.img_url||'';
   document.getElementById('dLink').value=d.link||'';
   document.getElementById('dPrice').value=d.price||'';
   document.getElementById('dAuthor').value=d.author||'';
@@ -572,29 +697,33 @@ function editDesire(id){
   if(dImgData){prev.src=dImgData;prev.style.display='block';}else prev.style.display='none';
   document.getElementById('bookToggle').classList.toggle('on',isBook);
   document.getElementById('bookFields').classList.toggle('open',isBook);
-  document.getElementById('dToggle').classList.toggle('on',!!d.pub);
-  fillWLSelect(d.wlId);clearPrio('d');
+  document.getElementById('dToggle').classList.toggle('on',!!d.is_public);
+  fillWLSelect(d.wishlist_id);clearPrio('d');
   document.querySelector(`#overlayD .prio-opt[data-p="${dPrio}"]`)?.classList.add('sel-'+dPrio);
   document.getElementById('overlayD').classList.add('open');
   resetSwipe('drow-'+id);
 }
 
-function deleteWL(id){
+async function deleteWL(id){
   if(!confirm('Eliminare questa wishlist e tutti i suoi desideri?'))return;
+  const {error}=await sb.from('wishlists').delete().eq('id',id);
+  if(error){showToast('Errore eliminazione');return;}
   wls=wls.filter(x=>x.id!==id);
-  desires=desires.filter(x=>x.wlId!==id);
-  save();renderHome();
+  desires=desires.filter(x=>x.wishlist_id!==id);
+  renderHome();
 }
 
-function deleteDesire(id){
+async function deleteDesire(id){
   if(!confirm('Eliminare questo desiderio?'))return;
+  const {error}=await sb.from('desires').delete().eq('id',id);
+  if(error){showToast('Errore eliminazione');return;}
   desires=desires.filter(x=>x.id!==id);
-  save();renderDetail();
+  renderDetail();
 }
 
 function shareList(){
-  const url=window.location.href.split('#')[0]+'#share/'+currentWL;
-  navigator.clipboard?.writeText(url).then(()=>showToast('Link copiato!')).catch(()=>showToast('Copia manuale: '+url));
+  const url=window.location.origin+window.location.pathname+'?share='+currentWL;
+  navigator.clipboard?.writeText(url).then(()=>showToast('Link copiato!')).catch(()=>showToast('Link: '+url));
 }
 
 function showToast(msg){
@@ -625,11 +754,18 @@ function resetSwipe(rowId){
   if(card){card.style.transform='';card.style.transition='transform .2s';}
 }
 
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 document.querySelectorAll('.overlay').forEach(o=>{
   o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
 });
 
-renderHome();
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(session?.user){currentUser=session.user;showApp();}
+})();
 </script>
 </body>
 </html>
