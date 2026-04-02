@@ -61,7 +61,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .wl-meta{font-size:12px;color:var(--text3);margin-top:3px;display:flex;align-items:center;gap:6px;}
 .vis-dot{width:5px;height:5px;border-radius:50%;display:inline-block;}
 .vis-pub{background:#4CAF50;}.vis-priv{background:var(--accent);}
-.wl-prio{font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--border);color:var(--text2);background:var(--surface2);}
 
 .swipe-actions{position:absolute;right:0;top:0;bottom:0;display:flex;z-index:0;}
 .sw-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:64px;gap:2px;cursor:pointer;font-size:11px;font-weight:500;}
@@ -76,9 +75,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .detail-title{font-family:'Cormorant Garamond',serif;font-size:20px;flex:1;}
 .share-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text2);}
 
-.sort-bar{padding:10px 16px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none;}
-.sort-bar::-webkit-scrollbar{display:none;}
-.sort-chip{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);cursor:pointer;white-space:nowrap;color:var(--text2);flex-shrink:0;}
+/* SORT BAR — 3 toggle chips */
+.sort-bar{padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid var(--border);}
+.sort-chip{flex:1;font-size:11px;padding:6px 4px;border-radius:20px;border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--text2);text-align:center;white-space:nowrap;transition:all .15s;}
 .sort-chip.active{background:var(--text);color:var(--bg);border-color:var(--text);}
 
 .desire-list{display:flex;flex-direction:column;}
@@ -149,7 +148,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 22px;border-radius:20px;font-size:13px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
-
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
@@ -204,12 +202,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="share-btn" onclick="shareList()">⎙</button>
     </div>
     <div class="sort-bar">
-      <div class="sort-chip active" onclick="setSort(this,'newest')">Recenti</div>
-      <div class="sort-chip" onclick="setSort(this,'oldest')">Meno recenti</div>
-      <div class="sort-chip" onclick="setSort(this,'price-asc')">Prezzo ↑</div>
-      <div class="sort-chip" onclick="setSort(this,'price-desc')">Prezzo ↓</div>
-      <div class="sort-chip" onclick="setSort(this,'prio-asc')">Priorità ↑</div>
-      <div class="sort-chip" onclick="setSort(this,'prio-desc')">Priorità ↓</div>
+      <div class="sort-chip active" id="sortDate" onclick="toggleSort('date')">Recenti ↓</div>
+      <div class="sort-chip" id="sortPrice" onclick="toggleSort('price')">Prezzo ↑</div>
+      <div class="sort-chip" id="sortPrio" onclick="toggleSort('prio')">Priorità ↓</div>
     </div>
     <div id="desireLoading" class="loading" style="display:none;">Caricamento...</div>
     <div class="desire-list" id="desireList"></div>
@@ -262,16 +257,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <textarea id="wlDesc" placeholder="Per chi è? Quando?"></textarea>
     </div>
     <div class="field">
-      <label>Priorità default</label>
-      <div class="prio-row">
-        <div class="prio-opt" data-p="alto" onclick="selPrio(this,'wl')">Alto</div>
-        <div class="prio-opt" data-p="medio" onclick="selPrio(this,'wl')">Medio</div>
-        <div class="prio-opt" data-p="basso" onclick="selPrio(this,'wl')">Basso</div>
-      </div>
-    </div>
-    <div class="field">
       <div class="toggle-row">
-        <span>Lista pubblica</span>
+        <span>Lista privata</span>
         <div class="toggle" id="wlToggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
       </div>
     </div>
@@ -287,10 +274,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="dModalTitle">Nuovo desiderio</div>
+
     <div class="book-toggle-row" onclick="toggleBookFields()">
       <span>📖 È un libro?</span>
       <div class="toggle" id="bookToggle" onclick="event.stopPropagation();toggleBookFields()"><div class="toggle-thumb"></div></div>
     </div>
+
+    <div class="field">
+      <label>Titolo *</label>
+      <input type="text" id="dName" placeholder="Es. Il barone rampante">
+    </div>
+
     <div class="book-fields" id="bookFields">
       <div class="field">
         <label>Autore</label>
@@ -301,10 +295,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <input type="text" id="dPublisher" placeholder="Es. Einaudi">
       </div>
     </div>
-    <div class="field">
-      <label>Nome</label>
-      <input type="text" id="dName" placeholder="Es. Il barone rampante">
-    </div>
+
     <div class="field">
       <label>Immagine</label>
       <div class="img-upload-area" onclick="document.getElementById('dFileInput').click()">
@@ -326,9 +317,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="field">
       <label>Priorità</label>
       <div class="prio-row">
-        <div class="prio-opt" data-p="alto" onclick="selPrio(this,'d')">Alto</div>
-        <div class="prio-opt" data-p="medio" onclick="selPrio(this,'d')">Medio</div>
-        <div class="prio-opt" data-p="basso" onclick="selPrio(this,'d')">Basso</div>
+        <div class="prio-opt" data-p="alto" onclick="selPrio(this)">Alto</div>
+        <div class="prio-opt" data-p="medio" onclick="selPrio(this)">Medio</div>
+        <div class="prio-opt" data-p="basso" onclick="selPrio(this)">Basso</div>
       </div>
     </div>
     <div class="field">
@@ -337,7 +328,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="field">
       <div class="toggle-row">
-        <span>Pubblico</span>
+        <span>Desiderio privato</span>
         <div class="toggle" id="dToggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
       </div>
     </div>
@@ -362,11 +353,40 @@ const ICONS=[
 ];
 
 let currentUser=null,wls=[],desires=[],editingWL=null,editingD=null;
-let currentWL=null,currentSort='newest',fabOpen=false;
-let wlPrio='medio',dPrio='medio',selIcon=ICONS[0].e;
+let currentWL=null,fabOpen=false;
+let dPrio='medio',selIcon=ICONS[0].e;
 let wlImgData='',dImgData='',isBook=false;
 let authMode='login';
 
+// sort state per ogni chip: date, price, prio
+const sortState={date:'desc',price:'asc',prio:'desc'};
+let activeSort='date';
+
+const sortLabels={
+  date:{asc:'Recenti ↑',desc:'Recenti ↓'},
+  price:{asc:'Prezzo ↑',desc:'Prezzo ↓'},
+  prio:{asc:'Priorità ↑',desc:'Priorità ↓'}
+};
+
+function toggleSort(key){
+  if(activeSort===key){
+    sortState[key]=sortState[key]==='asc'?'desc':'asc';
+  } else {
+    activeSort=key;
+  }
+  updateSortChips();
+  renderDetail();
+}
+
+function updateSortChips(){
+  ['date','price','prio'].forEach(k=>{
+    const chip=document.getElementById('sort'+k.charAt(0).toUpperCase()+k.slice(1));
+    chip.textContent=sortLabels[k][sortState[k]];
+    chip.classList.toggle('active',activeSort===k);
+  });
+}
+
+// AUTH
 function switchTab(mode){
   authMode=mode;
   document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(mode==='login'&&i===0)||(mode==='signup'&&i===1)));
@@ -416,6 +436,7 @@ function showApp(){
   loadWishlists();
 }
 
+// DATA
 async function loadWishlists(){
   document.getElementById('wlLoading').style.display='block';
   document.getElementById('wlList').innerHTML='';
@@ -445,6 +466,7 @@ async function loadDesires(wlId){
   renderDetail();
 }
 
+// RENDER
 function renderHome(){
   const list=document.getElementById('wlList');
   const empty=document.getElementById('wlEmpty');
@@ -456,6 +478,7 @@ function renderHome(){
     const dc=desires.filter(d=>d.wishlist_id===w.id).length;
     const imgSrc=w.img_data||w.img_url||'';
     const iconContent=imgSrc?`<img src="${imgSrc}" onerror="this.style.display='none'">`:`${w.icon}`;
+    const isPrivate=w.is_public===false;
     return`<div class="wl-row" id="row-${w.id}">
       <div class="swipe-actions">
         <div class="sw-btn sw-edit" onclick="editWL('${w.id}')"><span>✎</span><span>Modifica</span></div>
@@ -467,11 +490,10 @@ function renderHome(){
           <div class="wl-name">${escHtml(w.name)}</div>
           <div class="wl-meta">
             <span>${dc} ${dc===1?'desiderio':'desideri'}</span>
-            <span class="vis-dot ${w.is_public?'vis-pub':'vis-priv'}"></span>
-            <span>${w.is_public?'pubblica':'privata'}</span>
+            <span class="vis-dot ${isPrivate?'vis-priv':'vis-pub'}"></span>
+            <span>${isPrivate?'privata':'pubblica'}</span>
           </div>
         </div>
-        <span class="wl-prio">${w.priority}</span>
       </div>
     </div>`;
   }).join('');
@@ -514,27 +536,28 @@ function renderDetail(){
 function sortDesires(ds){
   const pMap={alto:3,medio:2,basso:1};
   return ds.slice().sort((a,b)=>{
-    if(currentSort==='newest')return new Date(b.created_at)-new Date(a.created_at);
-    if(currentSort==='oldest')return new Date(a.created_at)-new Date(b.created_at);
-    if(currentSort==='price-asc')return (parseFloat(a.price)||0)-(parseFloat(b.price)||0);
-    if(currentSort==='price-desc')return (parseFloat(b.price)||0)-(parseFloat(a.price)||0);
-    if(currentSort==='prio-asc')return (pMap[a.priority]||2)-(pMap[b.priority]||2);
-    if(currentSort==='prio-desc')return (pMap[b.priority]||2)-(pMap[a.priority]||2);
+    if(activeSort==='date'){
+      const diff=new Date(b.created_at)-new Date(a.created_at);
+      return sortState.date==='desc'?diff:-diff;
+    }
+    if(activeSort==='price'){
+      const diff=(parseFloat(a.price)||0)-(parseFloat(b.price)||0);
+      return sortState.price==='asc'?diff:-diff;
+    }
+    if(activeSort==='prio'){
+      const diff=(pMap[b.priority]||2)-(pMap[a.priority]||2);
+      return sortState.prio==='desc'?diff:-diff;
+    }
     return 0;
   });
 }
 
-function setSort(el,s){
-  currentSort=s;
-  document.querySelectorAll('.sort-chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');renderDetail();
-}
-
 function openDetail(id){
-  currentWL=id;currentSort='newest';
+  currentWL=id;
+  activeSort='date';sortState.date='desc';
   document.getElementById('homeView').classList.add('hidden');
   document.getElementById('detailView').classList.add('active');
-  document.querySelectorAll('.sort-chip').forEach((c,i)=>c.classList.toggle('active',i===0));
+  updateSortChips();
   loadDesires(id);
 }
 
@@ -558,8 +581,8 @@ function openModal(type){
     ['wlName','wlDesc','wlImgUrl'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('wlPreview').style.display='none';
     document.getElementById('wlToggle').classList.remove('on');
-    selIcon=ICONS[0].e;wlPrio='medio';
-    buildIconPicker();clearPrio('wl');
+    selIcon=ICONS[0].e;
+    buildIconPicker();
     document.getElementById('overlayWL').classList.add('open');
   } else {
     editingD=null;dImgData='';isBook=false;
@@ -569,7 +592,7 @@ function openModal(type){
     document.getElementById('dToggle').classList.remove('on');
     document.getElementById('bookToggle').classList.remove('on');
     document.getElementById('bookFields').classList.remove('open');
-    dPrio='medio';clearPrio('d');
+    dPrio='medio';clearPrio();
     fillWLSelect(currentWL);
     document.getElementById('overlayD').classList.add('open');
   }
@@ -604,15 +627,14 @@ function pickIcon(el,e){
   el.classList.add('selected');
 }
 
-function selPrio(el,ctx){
-  const p=el.dataset.p;
-  if(ctx==='wl')wlPrio=p; else dPrio=p;
+function selPrio(el){
+  const p=el.dataset.p;dPrio=p;
   el.parentNode.querySelectorAll('.prio-opt').forEach(x=>{x.className='prio-opt';});
   el.classList.add('sel-'+p);
 }
 
-function clearPrio(ctx){
-  document.querySelectorAll((ctx==='wl'?'#overlayWL':'#overlayD')+' .prio-opt').forEach(x=>{x.className='prio-opt';});
+function clearPrio(){
+  document.querySelectorAll('#overlayD .prio-opt').forEach(x=>{x.className='prio-opt';});
 }
 
 function fillWLSelect(preselect){
@@ -629,7 +651,16 @@ async function saveWishlist(){
   if(!name){showToast('Inserisci un nome');return;}
   const btn=document.getElementById('wlSaveBtn');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Salvo...';
-  const obj={name,icon:selIcon,img_data:wlImgData||null,img_url:document.getElementById('wlImgUrl').value.trim()||null,description:document.getElementById('wlDesc').value.trim()||null,priority:wlPrio,is_public:document.getElementById('wlToggle').classList.contains('on'),user_id:currentUser.id};
+  // toggle ON = privata, quindi is_public = !toggle.on
+  const isPrivate=document.getElementById('wlToggle').classList.contains('on');
+  const obj={
+    name,icon:selIcon,
+    img_data:wlImgData||null,
+    img_url:document.getElementById('wlImgUrl').value.trim()||null,
+    description:document.getElementById('wlDesc').value.trim()||null,
+    is_public:!isPrivate,
+    user_id:currentUser.id
+  };
   let error;
   if(editingWL){
     ({error}=await sb.from('wishlists').update(obj).eq('id',editingWL));
@@ -646,12 +677,25 @@ async function saveWishlist(){
 async function saveDesire(){
   const name=document.getElementById('dName').value.trim();
   const wlId=document.getElementById('dWishlist').value;
-  if(!name){showToast('Inserisci un nome');return;}
+  if(!name){showToast('Inserisci un titolo');return;}
   if(!wlId){showToast('Seleziona una wishlist');return;}
   const btn=document.getElementById('dSaveBtn');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Salvo...';
+  const isPrivate=document.getElementById('dToggle').classList.contains('on');
   const priceVal=document.getElementById('dPrice').value;
-  const obj={name,img_data:dImgData||null,img_url:document.getElementById('dImg').value.trim()||null,link:document.getElementById('dLink').value.trim()||null,wishlist_id:wlId,priority:dPrio,price:priceVal?parseFloat(priceVal):null,is_public:document.getElementById('dToggle').classList.contains('on'),is_book:isBook,author:document.getElementById('dAuthor').value.trim()||null,publisher:document.getElementById('dPublisher').value.trim()||null,user_id:currentUser.id};
+  const obj={
+    name,
+    img_data:dImgData||null,
+    img_url:document.getElementById('dImg').value.trim()||null,
+    link:document.getElementById('dLink').value.trim()||null,
+    wishlist_id:wlId,priority:dPrio,
+    price:priceVal?parseFloat(priceVal):null,
+    is_public:!isPrivate,
+    is_book:isBook,
+    author:document.getElementById('dAuthor').value.trim()||null,
+    publisher:document.getElementById('dPublisher').value.trim()||null,
+    user_id:currentUser.id
+  };
   let error;
   if(editingD){
     ({error}=await sb.from('desires').update(obj).eq('id',editingD));
@@ -668,7 +712,7 @@ async function saveDesire(){
 
 function editWL(id){
   const w=wls.find(x=>x.id===id);if(!w)return;
-  editingWL=id;selIcon=w.icon;wlPrio=w.priority;wlImgData=w.img_data||'';
+  editingWL=id;selIcon=w.icon;wlImgData=w.img_data||'';
   document.getElementById('wlModalTitle').textContent='Modifica wishlist';
   document.getElementById('wlName').value=w.name;
   document.getElementById('wlDesc').value=w.description||'';
@@ -676,9 +720,9 @@ function editWL(id){
   const prev=document.getElementById('wlPreview');
   const src=wlImgData||w.img_url||'';
   if(src){prev.src=src;prev.style.display='block';}else prev.style.display='none';
-  document.getElementById('wlToggle').classList.toggle('on',!!w.is_public);
-  buildIconPicker();clearPrio('wl');
-  document.querySelector(`#overlayWL .prio-opt[data-p="${wlPrio}"]`)?.classList.add('sel-'+wlPrio);
+  // toggle ON = privata
+  document.getElementById('wlToggle').classList.toggle('on',!w.is_public);
+  buildIconPicker();
   document.getElementById('overlayWL').classList.add('open');
   resetSwipe('row-'+id);
 }
@@ -697,8 +741,8 @@ function editDesire(id){
   if(dImgData){prev.src=dImgData;prev.style.display='block';}else prev.style.display='none';
   document.getElementById('bookToggle').classList.toggle('on',isBook);
   document.getElementById('bookFields').classList.toggle('open',isBook);
-  document.getElementById('dToggle').classList.toggle('on',!!d.is_public);
-  fillWLSelect(d.wishlist_id);clearPrio('d');
+  document.getElementById('dToggle').classList.toggle('on',!d.is_public);
+  fillWLSelect(d.wishlist_id);clearPrio();
   document.querySelector(`#overlayD .prio-opt[data-p="${dPrio}"]`)?.classList.add('sel-'+dPrio);
   document.getElementById('overlayD').classList.add('open');
   resetSwipe('drow-'+id);
