@@ -544,6 +544,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <button class="fetch-use-btn" onclick="applyFetch()">Usa ✓</button>
         </div>
       </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.6;">
+        Funziona con Amazon, IBS, Feltrinelli, Libraccio, Mondadori, ASOS, Zalando*, Mediaworld e altri.<br>
+        <span style="font-style:italic;">*alcuni siti limitano l'accesso automatico.</span>
+      </div>
     </div>
     <div class="book-toggle-row" onclick="toggleBookFields()"><span>📖 È un libro?</span><div class="toggle" id="bookToggle" onclick="event.stopPropagation();toggleBookFields()"><div class="toggle-thumb"></div></div></div>
     <div class="field"><label>Titolo *</label><input type="text" id="dName" placeholder="Es. Il barone rampante"></div>
@@ -817,10 +821,17 @@ async function fetchMeta(){
       const prevImg=document.getElementById('fetchPreviewImg');
       prevImg.src=image||'';prevImg.style.display=image?'block':'none';
       document.getElementById('fetchPreviewTitle').textContent=title;
-      document.getElementById('fetchPreviewNote').textContent=isBookSite?'Sito libro rilevato':'';
+      document.getElementById('fetchPreviewNote').textContent=isBookSite?'Sito libro rilevato — attiva "È un libro?" per aggiungere autore ed editore':'';
       document.getElementById('fetchPreview').classList.add('show');
-    } else showToast('Nessun dato trovato');
-  } catch(e){showToast('Errore di connessione');}
+    } else {
+      // fallback: precompila solo il link e avvisa
+      document.getElementById('dLink').value=url;
+      showToast('Sito non leggibile — link salvato, compila i dettagli manualmente');
+    }
+  } catch(e){
+    document.getElementById('dLink').value=document.getElementById('fetchUrl').value.trim();
+    showToast('Errore di connessione — link salvato, compila manualmente');
+  }
   btn.disabled=false;btn.textContent='Importa';
 }
 function applyFetch(){
