@@ -17,7 +17,6 @@
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* AUTH */
 #authView{max-width:380px;margin:0 auto;padding:60px 24px;}
 .auth-logo{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:400;letter-spacing:1px;margin-bottom:6px;}
 .auth-sub{font-size:12px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:40px;}
@@ -33,7 +32,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .auth-err{font-size:12px;color:#DC2626;margin-top:10px;text-align:center;min-height:18px;}
 .auth-note{font-size:12px;color:var(--text3);margin-top:16px;text-align:center;line-height:1.6;}
 
-/* APP */
 #appView{display:none;max-width:420px;margin:0 auto;padding-bottom:80px;}
 
 .header{padding:24px 20px 10px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--border);}
@@ -43,7 +41,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .header-count{font-size:12px;color:var(--text3);}
 .logout-btn{font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;}
 
-/* PUBLIC VIEW */
 #publicView{display:none;max-width:420px;margin:0 auto;padding-bottom:40px;}
 .public-header{padding:28px 20px 16px;border-bottom:1px solid var(--border);}
 .public-logo{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;}
@@ -54,7 +51,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .public-login-banner{margin:16px 20px 0;padding:12px 16px;background:var(--accent-light);border-radius:var(--radiusS);display:flex;justify-content:space-between;align-items:center;gap:12px;}
 .public-login-banner p{font-size:12px;color:var(--accent-dark);line-height:1.5;}
 .public-login-btn{font-size:12px;padding:6px 14px;background:var(--text);color:var(--bg);border:none;border-radius:20px;cursor:pointer;white-space:nowrap;}
-
 .public-desire-list{display:flex;flex-direction:column;margin-top:4px;}
 .public-desire-row{border-bottom:1px solid var(--border);}
 .public-desire-card{padding:14px 20px;display:flex;align-items:center;gap:14px;}
@@ -73,7 +69,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .public-footer a{color:var(--accent-dark);text-decoration:none;font-size:13px;}
 .public-footer p{font-size:12px;margin-bottom:8px;}
 
-/* FAB */
 .fab{position:fixed;bottom:24px;right:24px;z-index:100;}
 .fab-main{width:50px;height:50px;border-radius:50%;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:transform .15s,background .15s;}
 .fab-main:hover{transform:scale(1.06);background:var(--accent-dark);}
@@ -139,6 +134,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);}
 .field textarea{resize:none;height:68px;}
 
+/* FETCH BOX */
+.fetch-box{border:1px solid var(--border);border-radius:var(--radiusS);overflow:hidden;margin-bottom:14px;}
+.fetch-input-row{display:flex;align-items:center;gap:0;}
+.fetch-input-row input{border:none;border-radius:0;background:var(--bg);flex:1;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;}
+.fetch-btn{padding:10px 14px;background:var(--text);color:var(--bg);border:none;font-size:12px;cursor:pointer;white-space:nowrap;transition:background .15s;font-family:'DM Sans',sans-serif;}
+.fetch-btn:hover{background:var(--accent-dark);}
+.fetch-btn:disabled{opacity:.5;cursor:not-allowed;}
+.fetch-preview{padding:10px 12px;border-top:1px solid var(--border);display:none;gap:10px;align-items:center;}
+.fetch-preview.show{display:flex;}
+.fetch-preview-img{width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--surface2);}
+.fetch-preview-info{flex:1;min-width:0;}
+.fetch-preview-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fetch-preview-price{font-size:11px;color:var(--accent-dark);margin-top:2px;}
+.fetch-preview-note{font-size:11px;color:var(--text3);margin-top:2px;}
+.fetch-use-btn{font-size:11px;padding:5px 10px;border-radius:20px;border:1px solid var(--accent);background:var(--accent-light);color:var(--accent-dark);cursor:pointer;white-space:nowrap;}
+
 .icon-picker{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px;}
 .icon-opt{width:42px;height:42px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:border-color .15s,background .15s;}
 .icon-opt.selected{border-color:var(--accent);background:var(--accent-light);}
@@ -182,12 +193,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 22px;border-radius:20px;font-size:13px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
+.spinner-dark{display:inline-block;width:12px;height:12px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--text2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
-<!-- AUTH -->
 <div id="authView">
   <div class="auth-logo">Wishful</div>
   <div class="auth-sub">Le tue wishlist</div>
@@ -208,7 +219,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="auth-note" id="authNote"></div>
 </div>
 
-<!-- PUBLIC VIEW -->
 <div id="publicView">
   <div class="public-header">
     <div class="public-logo">Wishful</div>
@@ -218,7 +228,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div id="pubMeta" class="public-wl-meta"></div>
   </div>
   <div id="pubLoginBanner" class="public-login-banner" style="display:none;">
-    <p>Accedi per prenotare un regalo e coordinarticon gli altri.</p>
+    <p>Accedi per prenotare un regalo e coordinarti con gli altri.</p>
     <button class="public-login-btn" onclick="showAuthFromPublic()">Accedi</button>
   </div>
   <div id="pubLoading" class="loading">Caricamento...</div>
@@ -229,7 +239,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- APP -->
 <div id="appView">
   <div class="home-view" id="homeView">
     <div class="header">
@@ -331,10 +340,32 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="dModalTitle">Nuovo desiderio</div>
+
+    <!-- FETCH BOX -->
+    <div class="field">
+      <label>Importa da link</label>
+      <div class="fetch-box">
+        <div class="fetch-input-row">
+          <input type="url" id="fetchUrl" placeholder="Incolla link prodotto o libro..." onkeydown="if(event.key==='Enter'){event.preventDefault();fetchMeta()}">
+          <button class="fetch-btn" id="fetchBtn" onclick="fetchMeta()">Importa</button>
+        </div>
+        <div class="fetch-preview" id="fetchPreview">
+          <img class="fetch-preview-img" id="fetchPreviewImg" src="" alt="">
+          <div class="fetch-preview-info">
+            <div class="fetch-preview-title" id="fetchPreviewTitle"></div>
+            <div class="fetch-preview-price" id="fetchPreviewPrice"></div>
+            <div class="fetch-preview-note" id="fetchPreviewNote"></div>
+          </div>
+          <button class="fetch-use-btn" onclick="applyFetch()">Usa ✓</button>
+        </div>
+      </div>
+    </div>
+
     <div class="book-toggle-row" onclick="toggleBookFields()">
       <span>📖 È un libro?</span>
       <div class="toggle" id="bookToggle" onclick="event.stopPropagation();toggleBookFields()"><div class="toggle-thumb"></div></div>
     </div>
+
     <div class="field">
       <label>Titolo *</label>
       <input type="text" id="dName" placeholder="Es. Il barone rampante">
@@ -409,8 +440,8 @@ let currentUser=null,wls=[],desires=[],editingWL=null,editingD=null;
 let currentWL=null,fabOpen=false;
 let dPrio='medio',selIcon=ICONS[0].e;
 let wlImgData='',dImgData='',isBook=false;
-let authMode='login';
-let pendingShareId=null; // share id se arrivato da link pubblico
+let authMode='login',pendingShareId=null;
+let fetchedData=null; // dati fetchati in attesa di applicazione
 
 const sortState={date:'desc',price:'asc',prio:'desc'};
 let activeSort='date';
@@ -432,6 +463,77 @@ function updateSortChips(){
     chip.textContent=sortLabels[k][sortState[k]];
     chip.classList.toggle('active',activeSort===k);
   });
+}
+
+// ── FETCH METADATA ──
+async function fetchMeta(){
+  const url=document.getElementById('fetchUrl').value.trim();
+  if(!url){showToast('Incolla un link prima');return;}
+  const btn=document.getElementById('fetchBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner-dark"></span>';
+  fetchedData=null;
+  document.getElementById('fetchPreview').classList.remove('show');
+
+  try{
+    // prova prima Open Library se sembra un libro o se è un link IBS/Feltrinelli/Libraccio
+    const isBookSite=/ibs\.it|feltrinelli|libraccio|mondadoristore|bookdepo|amazon.*dp/i.test(url);
+    let title='',image='',price='',note='';
+
+    const res=await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}&palette=false&audio=false&video=false&iframe=false`);
+    const data=await res.json();
+
+    if(data.status==='success'){
+      title=data.data?.title||'';
+      image=data.data?.image?.url||data.data?.logo?.url||'';
+      // prova a estrarre prezzo da description o title
+      const desc=data.data?.description||'';
+      const priceMatch=(title+' '+desc).match(/€\s?[\d,.]+|[\d,.]+\s?€|EUR\s?[\d,.]+/i);
+      if(priceMatch)price=priceMatch[0].replace(/[^\d,.]/g,'').replace(',','.');
+      note=isBookSite?'Sito libro rilevato — attiva "È un libro?" se vuoi aggiungere autore':'';
+    }
+
+    if(!title){
+      btn.disabled=false;btn.textContent='Importa';
+      showToast('Nessun dato trovato per questo link');return;
+    }
+
+    fetchedData={title,image,price,link:url};
+    const prevImg=document.getElementById('fetchPreviewImg');
+    prevImg.src=image||'';
+    prevImg.style.display=image?'block':'none';
+    document.getElementById('fetchPreviewTitle').textContent=title;
+    document.getElementById('fetchPreviewPrice').textContent=price?`€${price}`:'';
+    document.getElementById('fetchPreviewNote').textContent=note;
+    document.getElementById('fetchPreview').classList.add('show');
+
+  } catch(e){
+    showToast('Errore di connessione');
+  }
+  btn.disabled=false;btn.textContent='Importa';
+}
+
+function applyFetch(){
+  if(!fetchedData)return;
+  if(fetchedData.title)document.getElementById('dName').value=fetchedData.title;
+  if(fetchedData.link)document.getElementById('dLink').value=fetchedData.link;
+  if(fetchedData.price)document.getElementById('dPrice').value=fetchedData.price;
+  if(fetchedData.image){
+    document.getElementById('dImg').value=fetchedData.image;
+    const prev=document.getElementById('dPreview');
+    prev.src=fetchedData.image;prev.style.display='block';
+  }
+  // rileva se è probabile un libro
+  const isBookSite=/ibs\.it|feltrinelli|libraccio|mondadoristore|bookdepo/i.test(fetchedData.link);
+  if(isBookSite&&!isBook){
+    isBook=true;
+    document.getElementById('bookToggle').classList.add('on');
+    document.getElementById('bookFields').classList.add('open');
+  }
+  document.getElementById('fetchPreview').classList.remove('show');
+  document.getElementById('fetchUrl').value='';
+  fetchedData=null;
+  showToast('Dati importati ✓');
 }
 
 // ── AUTH ──
@@ -458,23 +560,16 @@ async function authSubmit(){
   btn.textContent=authMode==='login'?'Accedi':'Registrati';
   if(result.error){
     const msgs={'Invalid login credentials':'Email o password errati','Email not confirmed':'Controlla la email per confermare','User already registered':'Email già registrata, prova ad accedere'};
-    err.textContent=msgs[result.error.message]||result.error.message;
-    return;
+    err.textContent=msgs[result.error.message]||result.error.message;return;
   }
   if(authMode==='signup'&&!result.data.session){
     err.style.color='#15803D';
-    err.textContent='Registrazione completata! Controlla la email per confermare.';
-    return;
+    err.textContent='Registrazione completata! Controlla la email per confermare.';return;
   }
   if(result.data.user){
     currentUser=result.data.user;
-    // se era arrivato da link pubblico, torna alla vista pubblica
-    if(pendingShareId){
-      document.getElementById('authView').style.display='none';
-      showPublicView(pendingShareId);
-    } else {
-      showApp();
-    }
+    if(pendingShareId){document.getElementById('authView').style.display='none';showPublicView(pendingShareId);}
+    else showApp();
   }
 }
 
@@ -503,8 +598,8 @@ function showAuthFromPublic(){
 function showAppFromPublic(){
   pendingShareId=null;
   document.getElementById('publicView').style.display='none';
-  if(currentUser){showApp();}
-  else{document.getElementById('authView').style.display='block';}
+  if(currentUser)showApp();
+  else document.getElementById('authView').style.display='block';
 }
 
 // ── PUBLIC VIEW ──
@@ -515,59 +610,39 @@ async function showPublicView(wlId){
   document.getElementById('pubLoading').style.display='block';
   document.getElementById('pubDesireList').innerHTML='';
   pendingShareId=wlId;
-
-  // carica wishlist
   const {data:wl,error:wlErr}=await sb.from('wishlists').select('*').eq('id',wlId).eq('is_public',true).single();
   if(wlErr||!wl){
     document.getElementById('pubLoading').style.display='none';
     document.getElementById('pubDesireList').innerHTML='<div class="empty"><div class="e-icon">✦</div><p>Lista non trovata o privata.</p></div>';
     return;
   }
-
   document.getElementById('pubIcon').textContent=wl.icon||'✦';
   document.getElementById('pubName').textContent=wl.name;
   document.getElementById('pubDesc').textContent=wl.description||'';
   document.getElementById('pubDesc').style.display=wl.description?'block':'none';
-
-  // carica desideri pubblici
   const {data:ds}=await sb.from('desires').select('*').eq('wishlist_id',wlId).eq('is_public',true).order('created_at',{ascending:false});
   document.getElementById('pubLoading').style.display='none';
-
-  const desires=ds||[];
-  const count=desires.length;
-  document.getElementById('pubMeta').textContent=count+' '+(count===1?'desiderio':'desideri');
-
-  // mostra banner login se non autenticato
+  const list=ds||[];
+  document.getElementById('pubMeta').textContent=list.length+' '+(list.length===1?'desiderio':'desideri');
   const isOwner=currentUser&&currentUser.id===wl.user_id;
   document.getElementById('pubLoginBanner').style.display=(!currentUser&&!isOwner)?'flex':'none';
-
-  if(!count){
+  if(!list.length){
     document.getElementById('pubDesireList').innerHTML='<div class="empty"><div class="e-icon">♡</div><p>Nessun desiderio in questa lista.</p></div>';
     return;
   }
-
-  document.getElementById('pubDesireList').innerHTML=desires.map(d=>{
-    const imgSrc=d.img_data||d.img_url||'';
+  document.getElementById('pubDesireList').innerHTML=list.map(d=>{
+    const imgSrc=d.img_data||d.img_url||d.fetched_image||'';
     const imgContent=imgSrc?`<img src="${imgSrc}" onerror="this.textContent='♡'">`:'♡';
     const priceStr=d.price?`€${parseFloat(d.price).toFixed(2)}`:'';
     const bookStr=d.is_book&&d.author?`${escHtml(d.author)}${d.publisher?' · '+escHtml(d.publisher):''}`:'';
     const isReserved=!!d.reserved_by;
     const isMine=currentUser&&d.reserved_by===currentUser.id;
-
     let actionHtml='';
-    if(isOwner){
-      // proprietario: non vede nulla sulle prenotazioni
-      actionHtml='';
-    } else if(isMine){
-      actionHtml=`<button class="reserve-btn mine" onclick="unreserve('${d.id}')">Libera ✕</button>`;
-    } else if(isReserved){
-      actionHtml=`<span class="reserved-tag">Già prenotato</span>`;
-    } else if(currentUser){
-      actionHtml=`<button class="reserve-btn" onclick="reserve('${d.id}')">Prenoto ♡</button>`;
-    } else {
-      actionHtml=`<button class="reserve-btn" onclick="showAuthFromPublic()">Prenoto ♡</button>`;
-    }
-
+    if(isOwner)actionHtml='';
+    else if(isMine)actionHtml=`<button class="reserve-btn mine" onclick="unreserve('${d.id}')">Libera ✕</button>`;
+    else if(isReserved)actionHtml=`<span class="reserved-tag">Già prenotato</span>`;
+    else if(currentUser)actionHtml=`<button class="reserve-btn" onclick="reserve('${d.id}')">Prenoto ♡</button>`;
+    else actionHtml=`<button class="reserve-btn" onclick="showAuthFromPublic()">Prenoto ♡</button>`;
     return`<div class="public-desire-row" id="pub-${d.id}">
       <div class="public-desire-card${isReserved&&!isMine?' reserved':''}">
         <div class="public-desire-img">${imgContent}</div>
@@ -582,20 +657,18 @@ async function showPublicView(wlId){
   }).join('');
 }
 
-async function reserve(desireId){
+async function reserve(id){
   if(!currentUser){showAuthFromPublic();return;}
-  const {error}=await sb.from('desires').update({reserved_by:currentUser.id,reserved_at:new Date().toISOString()}).eq('id',desireId).is('reserved_by',null);
+  const {error}=await sb.from('desires').update({reserved_by:currentUser.id,reserved_at:new Date().toISOString()}).eq('id',id).is('reserved_by',null);
   if(error){showToast('Errore nella prenotazione');return;}
-  showToast('Prenotato! 🎁');
-  showPublicView(pendingShareId);
+  showToast('Prenotato! 🎁');showPublicView(pendingShareId);
 }
 
-async function unreserve(desireId){
+async function unreserve(id){
   if(!currentUser)return;
-  const {error}=await sb.from('desires').update({reserved_by:null,reserved_at:null}).eq('id',desireId).eq('reserved_by',currentUser.id);
+  const {error}=await sb.from('desires').update({reserved_by:null,reserved_at:null}).eq('id',id).eq('reserved_by',currentUser.id);
   if(error){showToast('Errore');return;}
-  showToast('Prenotazione rimossa');
-  showPublicView(pendingShareId);
+  showToast('Prenotazione rimossa');showPublicView(pendingShareId);
 }
 
 // ── DATA ──
@@ -672,7 +745,7 @@ function renderDetail(){
   if(!ds.length){list.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   list.innerHTML=ds.map(d=>{
-    const imgSrc=d.img_data||d.img_url||'';
+    const imgSrc=d.img_data||d.img_url||d.fetched_image||'';
     const imgContent=imgSrc?`<img src="${imgSrc}" onerror="this.textContent='♡'">`:'♡';
     const priceStr=d.price?`€${parseFloat(d.price).toFixed(2)}`:'';
     const bookStr=d.is_book&&d.author?`${escHtml(d.author)}${d.publisher?' · '+escHtml(d.publisher):''}`:'';
@@ -735,13 +808,14 @@ function openModal(type){
     selIcon=ICONS[0].e;buildIconPicker();
     document.getElementById('overlayWL').classList.add('open');
   } else {
-    editingD=null;dImgData='';isBook=false;
+    editingD=null;dImgData='';isBook=false;fetchedData=null;
     document.getElementById('dModalTitle').textContent='Nuovo desiderio';
-    ['dName','dImg','dLink','dAuthor','dPublisher','dPrice'].forEach(id=>document.getElementById(id).value='');
+    ['dName','dImg','dLink','dAuthor','dPublisher','dPrice','fetchUrl'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('dPreview').style.display='none';
     document.getElementById('dToggle').classList.remove('on');
     document.getElementById('bookToggle').classList.remove('on');
     document.getElementById('bookFields').classList.remove('open');
+    document.getElementById('fetchPreview').classList.remove('show');
     dPrio='medio';clearPrio();fillWLSelect(currentWL);
     document.getElementById('overlayD').classList.add('open');
   }
@@ -824,7 +898,20 @@ async function saveDesire(){
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Salvo...';
   const isPrivate=document.getElementById('dToggle').classList.contains('on');
   const priceVal=document.getElementById('dPrice').value;
-  const obj={name,img_data:dImgData||null,img_url:document.getElementById('dImg').value.trim()||null,link:document.getElementById('dLink').value.trim()||null,wishlist_id:wlId,priority:dPrio,price:priceVal?parseFloat(priceVal):null,is_public:!isPrivate,is_book:isBook,author:document.getElementById('dAuthor').value.trim()||null,publisher:document.getElementById('dPublisher').value.trim()||null,user_id:currentUser.id};
+  const imgUrl=document.getElementById('dImg').value.trim();
+  const obj={
+    name,
+    img_data:dImgData||null,
+    img_url:imgUrl||null,
+    fetched_image:(!dImgData&&!imgUrl&&fetchedData?.image)?fetchedData.image:null,
+    link:document.getElementById('dLink').value.trim()||null,
+    wishlist_id:wlId,priority:dPrio,
+    price:priceVal?parseFloat(priceVal):null,
+    is_public:!isPrivate,is_book:isBook,
+    author:document.getElementById('dAuthor').value.trim()||null,
+    publisher:document.getElementById('dPublisher').value.trim()||null,
+    user_id:currentUser.id
+  };
   let error;
   if(editingD){
     ({error}=await sb.from('desires').update(obj).eq('id',editingD));
@@ -857,7 +944,7 @@ function editWL(id){
 
 function editDesire(id){
   const d=desires.find(x=>x.id===id);if(!d)return;
-  editingD=id;dPrio=d.priority;dImgData=d.img_data||'';isBook=d.is_book||false;
+  editingD=id;dPrio=d.priority;dImgData=d.img_data||'';isBook=d.is_book||false;fetchedData=null;
   document.getElementById('dModalTitle').textContent='Modifica desiderio';
   document.getElementById('dName').value=d.name;
   document.getElementById('dImg').value=d.img_url||'';
@@ -865,8 +952,11 @@ function editDesire(id){
   document.getElementById('dPrice').value=d.price||'';
   document.getElementById('dAuthor').value=d.author||'';
   document.getElementById('dPublisher').value=d.publisher||'';
+  document.getElementById('fetchUrl').value='';
+  document.getElementById('fetchPreview').classList.remove('show');
   const prev=document.getElementById('dPreview');
-  if(dImgData){prev.src=dImgData;prev.style.display='block';}else prev.style.display='none';
+  const imgSrc=dImgData||d.img_url||d.fetched_image||'';
+  if(imgSrc){prev.src=imgSrc;prev.style.display='block';}else prev.style.display='none';
   document.getElementById('bookToggle').classList.toggle('on',isBook);
   document.getElementById('bookFields').classList.toggle('open',isBook);
   document.getElementById('dToggle').classList.toggle('on',!d.is_public);
@@ -934,28 +1024,20 @@ document.querySelectorAll('.overlay').forEach(o=>{
   o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
 });
 
-// ── INIT ──
 (async()=>{
   const {data:{session}}=await sb.auth.getSession();
   if(session?.user)currentUser=session.user;
-
-  // controlla se c'è ?share=ID nell'URL
   const params=new URLSearchParams(window.location.search);
   const shareId=params.get('share');
-
   if(shareId){
-    // se è il proprietario, vai all'app normale
     if(currentUser){
       const {data:wl}=await sb.from('wishlists').select('user_id').eq('id',shareId).single();
-      if(wl&&wl.user_id===currentUser.id){
-        showApp();return;
-      }
+      if(wl&&wl.user_id===currentUser.id){showApp();return;}
     }
     showPublicView(shareId);
   } else if(currentUser){
     showApp();
   }
-  // altrimenti mostra auth (già visibile di default)
 })();
 </script>
 </body>
