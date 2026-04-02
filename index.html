@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Wishful</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F9F8F5;--surface:#FFFFFF;--surface2:#F2F0EB;
+  --text:#111110;--text2:#6B6860;--text3:#A8A69E;
+  --accent:#B8860B;--accent-light:#F7F0DC;--accent-dark:#7A5A00;
+  --border:#E4E1D9;--radius:14px;--radiusS:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+#app{max-width:420px;margin:0 auto;padding-bottom:80px;}
+
+.header{padding:28px 20px 10px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--border);}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:400;letter-spacing:1px;color:var(--text);line-height:1;}
+.logo-sub{font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.header-count{font-size:13px;color:var(--text3);}
+
+.fab{position:fixed;bottom:24px;right:24px;z-index:100;}
+.fab-main{width:50px;height:50px;border-radius:50%;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:transform .15s,background .15s;}
+.fab-main:hover{transform:scale(1.06);background:var(--accent-dark);}
+.fab-menu{position:absolute;bottom:60px;right:0;display:flex;flex-direction:column;gap:8px;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s;}
+.fab-menu.open{opacity:1;pointer-events:all;}
+.fab-item{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.fab-item span.lbl{background:var(--text);color:var(--bg);font-size:12px;padding:5px 12px;border-radius:20px;white-space:nowrap;}
+.fab-item .ic{width:38px;height:38px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;}
+
+.section-label{font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;padding:18px 20px 8px;}
+.wl-list{display:flex;flex-direction:column;}
+.wl-row{position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+.wl-card{background:var(--surface);padding:14px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .12s;position:relative;z-index:1;}
+.wl-card:active{background:var(--surface2);}
+.wl-icon{width:50px;height:50px;border-radius:12px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;}
+.wl-icon img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
+.wl-info{flex:1;min-width:0;}
+.wl-name{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wl-meta{font-size:12px;color:var(--text3);margin-top:3px;display:flex;align-items:center;gap:6px;}
+.vis-dot{width:5px;height:5px;border-radius:50%;display:inline-block;}
+.vis-pub{background:#4CAF50;}.vis-priv{background:var(--accent);}
+.wl-prio{font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--border);color:var(--text2);background:var(--surface2);}
+
+.swipe-actions{position:absolute;right:0;top:0;bottom:0;display:flex;z-index:0;}
+.sw-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:64px;gap:2px;cursor:pointer;font-size:11px;font-weight:500;}
+.sw-edit{background:#F0F4FF;color:#1A56DB;}
+.sw-del{background:#FEF2F2;color:#DC2626;}
+
+.detail-view{display:none;}
+.detail-view.active{display:block;}
+.home-view.hidden{display:none;}
+
+.detail-header{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.back-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text);}
+.detail-title{font-family:'Cormorant Garamond',serif;font-size:20px;flex:1;}
+.share-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text2);}
+
+.sort-bar{padding:10px 16px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none;}
+.sort-bar::-webkit-scrollbar{display:none;}
+.sort-chip{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);cursor:pointer;white-space:nowrap;color:var(--text2);flex-shrink:0;}
+.sort-chip.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+
+.desire-list{display:flex;flex-direction:column;}
+.desire-row{position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+.desire-card{background:var(--surface);padding:12px 18px;display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+.desire-img{width:46px;height:46px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;color:var(--text3);}
+.desire-img img{width:100%;height:100%;object-fit:cover;}
+.desire-info{flex:1;min-width:0;}
+.desire-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.desire-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.desire-book{font-size:11px;color:var(--accent-dark);font-style:italic;margin-top:1px;}
+.prio-badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:500;white-space:nowrap;}
+.prio-alto{background:#FEF2F2;color:#DC2626;}
+.prio-medio{background:var(--accent-light);color:var(--accent-dark);}
+.prio-basso{background:#F0FDF4;color:#15803D;}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-width:420px;padding:20px 20px 32px;max-height:88vh;overflow-y:auto;transform:translateY(20px);transition:transform .2s;}
+.overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:36px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:20px;}
+.field{margin-bottom:14px;}
+.field label{font-size:11px;color:var(--text2);display:block;margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;}
+.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radiusS);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .15s;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);}
+.field textarea{resize:none;height:68px;}
+
+.icon-picker{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px;}
+.icon-opt{width:42px;height:42px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:border-color .15s,background .15s;}
+.icon-opt.selected{border-color:var(--accent);background:var(--accent-light);}
+
+.img-upload-area{border:1.5px dashed var(--border);border-radius:var(--radiusS);padding:14px;text-align:center;cursor:pointer;transition:border-color .15s;margin-top:6px;}
+.img-upload-area:hover{border-color:var(--accent);}
+.img-upload-area input[type=file]{display:none;}
+.img-preview{width:100%;height:90px;object-fit:cover;border-radius:6px;margin-top:8px;display:none;}
+.img-upload-label{font-size:12px;color:var(--text3);}
+.img-or{font-size:11px;color:var(--text3);text-align:center;margin:8px 0 4px;}
+
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;}
+.toggle-row span{font-size:13px;color:var(--text);}
+.toggle{width:42px;height:23px;border-radius:12px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;}
+.toggle.on{background:var(--text);}
+.toggle-thumb{width:19px;height:19px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;}
+.toggle.on .toggle-thumb{left:21px;}
+
+.prio-row{display:flex;gap:8px;}
+.prio-opt{flex:1;padding:8px 4px;text-align:center;border-radius:var(--radiusS);border:1.5px solid var(--border);font-size:12px;cursor:pointer;transition:all .15s;color:var(--text2);}
+.prio-opt.sel-alto{background:#FEF2F2;border-color:#FCA5A5;color:#DC2626;}
+.prio-opt.sel-medio{background:var(--accent-light);border-color:#D4A017;color:var(--accent-dark);}
+.prio-opt.sel-basso{background:#F0FDF4;border-color:#86EFAC;color:#15803D;}
+
+.book-toggle-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:var(--radiusS);background:var(--accent-light);margin-bottom:14px;cursor:pointer;}
+.book-toggle-row span{font-size:13px;color:var(--accent-dark);font-style:italic;}
+.book-fields{display:none;}
+.book-fields.open{display:block;}
+
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-primary{flex:1;padding:12px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radiusS);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;}
+.btn-primary:hover{background:var(--accent-dark);}
+.btn-secondary{padding:12px 18px;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--radiusS);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;}
+
+.empty{text-align:center;padding:52px 20px;color:var(--text3);}
+.empty .e-icon{font-size:32px;margin-bottom:12px;opacity:.5;}
+.empty p{font-size:13px;line-height:1.8;}
+
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 22px;border-radius:20px;font-size:13px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="home-view" id="homeView">
+    <div class="header">
+      <div>
+        <div class="logo-name">Wishful</div>
+        <div class="logo-sub">Le tue wishlist</div>
+      </div>
+      <div class="header-count" id="totalBadge"></div>
+    </div>
+    <div class="section-label">Wishlist</div>
+    <div class="wl-list" id="wlList"></div>
+    <div id="wlEmpty" class="empty" style="display:none;">
+      <div class="e-icon">✦</div>
+      <p>Nessuna wishlist ancora.<br>Creane una con il tasto +</p>
+    </div>
+  </div>
+
+  <div class="detail-view" id="detailView">
+    <div class="detail-header">
+      <button class="back-btn" onclick="goHome()">←</button>
+      <div id="detailIcon" style="font-size:20px;"></div>
+      <div class="detail-title" id="detailTitle"></div>
+      <button class="share-btn" onclick="shareList()" title="Condividi">⎙</button>
+    </div>
+    <div class="sort-bar">
+      <div class="sort-chip active" onclick="setSort(this,'newest')">Recenti</div>
+      <div class="sort-chip" onclick="setSort(this,'oldest')">Meno recenti</div>
+      <div class="sort-chip" onclick="setSort(this,'price-asc')">Prezzo ↑</div>
+      <div class="sort-chip" onclick="setSort(this,'price-desc')">Prezzo ↓</div>
+      <div class="sort-chip" onclick="setSort(this,'prio-asc')">Priorità ↑</div>
+      <div class="sort-chip" onclick="setSort(this,'prio-desc')">Priorità ↓</div>
+    </div>
+    <div class="desire-list" id="desireList"></div>
+    <div id="desireEmpty" class="empty" style="display:none;">
+      <div class="e-icon">♡</div>
+      <p>Nessun desiderio ancora.<br>Aggiungine uno con il tasto +</p>
+    </div>
+  </div>
+</div>
+
+<div class="fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" onclick="openModal('desire')">
+      <span class="lbl">Nuovo desiderio</span>
+      <div class="ic">♡</div>
+    </div>
+    <div class="fab-item" onclick="openModal('wishlist')">
+      <span class="lbl">Nuova wishlist</span>
+      <div class="ic">✦</div>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()">+</button>
+</div>
+
+<!-- MODAL WISHLIST -->
+<div class="overlay" id="overlayWL">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="wlModalTitle">Nuova wishlist</div>
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="wlName" placeholder="Es. Compleanno 2025">
+    </div>
+    <div class="field">
+      <label>Icona categoria</label>
+      <div class="icon-picker" id="iconPicker"></div>
+    </div>
+    <div class="field">
+      <label>Immagine di copertina</label>
+      <div class="img-upload-area" onclick="document.getElementById('wlFileInput').click()">
+        <input type="file" id="wlFileInput" accept="image/*" onchange="handleImgUpload(this,'wlPreview','wl')">
+        <div class="img-upload-label">Tocca per caricare dal dispositivo</div>
+        <img id="wlPreview" class="img-preview">
+      </div>
+      <div class="img-or">oppure</div>
+      <input type="url" id="wlImgUrl" placeholder="URL immagine https://...">
+    </div>
+    <div class="field">
+      <label>Descrizione evento (opzionale)</label>
+      <textarea id="wlDesc" placeholder="Per chi è? Quando?"></textarea>
+    </div>
+    <div class="field">
+      <label>Priorità default</label>
+      <div class="prio-row">
+        <div class="prio-opt" data-p="alto" onclick="selPrio(this,'wl')">Alto</div>
+        <div class="prio-opt" data-p="medio" onclick="selPrio(this,'wl')">Medio</div>
+        <div class="prio-opt" data-p="basso" onclick="selPrio(this,'wl')">Basso</div>
+      </div>
+    </div>
+    <div class="field">
+      <div class="toggle-row">
+        <span>Lista pubblica</span>
+        <div class="toggle" id="wlToggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('overlayWL')">Annulla</button>
+      <button class="btn-primary" onclick="saveWishlist()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DESIRE -->
+<div class="overlay" id="overlayD">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="dModalTitle">Nuovo desiderio</div>
+    <div class="book-toggle-row" onclick="toggleBookFields()">
+      <span>📖 È un libro?</span>
+      <div class="toggle" id="bookToggle" onclick="event.stopPropagation();toggleBookFields()"><div class="toggle-thumb"></div></div>
+    </div>
+    <div class="book-fields" id="bookFields">
+      <div class="field">
+        <label>Autore</label>
+        <input type="text" id="dAuthor" placeholder="Es. Italo Calvino">
+      </div>
+      <div class="field">
+        <label>Editore</label>
+        <input type="text" id="dPublisher" placeholder="Es. Einaudi">
+      </div>
+    </div>
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="dName" placeholder="Es. Il barone rampante">
+    </div>
+    <div class="field">
+      <label>Immagine</label>
+      <div class="img-upload-area" onclick="document.getElementById('dFileInput').click()">
+        <input type="file" id="dFileInput" accept="image/*" onchange="handleImgUpload(this,'dPreview','d')">
+        <div class="img-upload-label">Tocca per caricare dal dispositivo</div>
+        <img id="dPreview" class="img-preview">
+      </div>
+      <div class="img-or">oppure</div>
+      <input type="url" id="dImg" placeholder="URL immagine https://...">
+    </div>
+    <div class="field">
+      <label>Link prodotto</label>
+      <input type="url" id="dLink" placeholder="https://...">
+    </div>
+    <div class="field">
+      <label>Wishlist</label>
+      <select id="dWishlist"></select>
+    </div>
+    <div class="field">
+      <label>Priorità</label>
+      <div class="prio-row">
+        <div class="prio-opt" data-p="alto" onclick="selPrio(this,'d')">Alto</div>
+        <div class="prio-opt" data-p="medio" onclick="selPrio(this,'d')">Medio</div>
+        <div class="prio-opt" data-p="basso" onclick="selPrio(this,'d')">Basso</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Prezzo (€)</label>
+      <input type="number" id="dPrice" placeholder="0.00" step="0.01" min="0">
+    </div>
+    <div class="field">
+      <div class="toggle-row">
+        <span>Pubblico</span>
+        <div class="toggle" id="dToggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('overlayD')">Annulla</button>
+      <button class="btn-primary" onclick="saveDesire()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ICONS=[
+  {e:'📚',l:'Libri'},{e:'✈️',l:'Viaggi'},{e:'👗',l:'Moda'},{e:'💄',l:'Beauty'},
+  {e:'🎮',l:'Gaming'},{e:'🏠',l:'Casa'},{e:'🍽️',l:'Cibo'},{e:'🎵',l:'Musica'},
+  {e:'🌿',l:'Natura'},{e:'💻',l:'Tech'},{e:'🎨',l:'Arte'},{e:'🐾',l:'Animali'}
+];
+let wls=JSON.parse(localStorage.getItem('wishful_wl')||'[]');
+let desires=JSON.parse(localStorage.getItem('wishful_d')||'[]');
+let editingWL=null,editingD=null,currentWL=null,currentSort='newest';
+let wlPrio='medio',dPrio='medio',selIcon=ICONS[0].e,fabOpen=false;
+let wlImgData='',dImgData='';
+let isBook=false;
+
+function save(){
+  localStorage.setItem('wishful_wl',JSON.stringify(wls));
+  localStorage.setItem('wishful_d',JSON.stringify(desires));
+}
+
+function handleImgUpload(input,previewId,ctx){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const prev=document.getElementById(previewId);
+    prev.src=e.target.result;prev.style.display='block';
+    if(ctx==='wl')wlImgData=e.target.result;
+    else dImgData=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderHome(){
+  const list=document.getElementById('wlList');
+  const empty=document.getElementById('wlEmpty');
+  const count=wls.length;
+  document.getElementById('totalBadge').textContent=count?count+' '+(count===1?'lista':'liste'):'';
+  if(!count){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=wls.map(w=>{
+    const dc=desires.filter(d=>d.wlId===w.id).length;
+    const imgSrc=w.imgData||w.imgUrl||'';
+    const iconContent=imgSrc?`<img src="${imgSrc}" onerror="this.style.display='none'">`:`${w.icon}`;
+    return`<div class="wl-row" id="row-${w.id}">
+      <div class="swipe-actions">
+        <div class="sw-btn sw-edit" onclick="editWL('${w.id}')"><span>✎</span><span>Modifica</span></div>
+        <div class="sw-btn sw-del" onclick="deleteWL('${w.id}')"><span>✕</span><span>Elimina</span></div>
+      </div>
+      <div class="wl-card" onclick="openDetail('${w.id}')" data-rowid="${w.id}">
+        <div class="wl-icon">${iconContent}</div>
+        <div class="wl-info">
+          <div class="wl-name">${w.name}</div>
+          <div class="wl-meta">
+            <span>${dc} ${dc===1?'desiderio':'desideri'}</span>
+            <span class="vis-dot ${w.pub?'vis-pub':'vis-priv'}"></span>
+            <span>${w.pub?'pubblica':'privata'}</span>
+          </div>
+        </div>
+        <span class="wl-prio">${w.prio}</span>
+      </div>
+    </div>`;
+  }).join('');
+  addSwipe('.wl-card');
+}
+
+function renderDetail(){
+  const w=wls.find(x=>x.id===currentWL);if(!w)return;
+  document.getElementById('detailTitle').textContent=w.name;
+  document.getElementById('detailIcon').textContent=w.icon;
+  let ds=sortDesires(desires.filter(d=>d.wlId===currentWL));
+  const list=document.getElementById('desireList');
+  const empty=document.getElementById('desireEmpty');
+  if(!ds.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=ds.map(d=>{
+    const imgSrc=d.imgData||d.imgUrl||'';
+    const imgContent=imgSrc?`<img src="${imgSrc}" onerror="this.textContent='♡'">`:'♡';
+    const priceStr=d.price?`€${parseFloat(d.price).toFixed(2)}`:'';
+    const bookStr=d.isBook&&d.author?`${d.author}${d.publisher?' · '+d.publisher:''}`:'';
+    return`<div class="desire-row" id="drow-${d.id}">
+      <div class="swipe-actions">
+        <div class="sw-btn sw-edit" onclick="editDesire('${d.id}')"><span>✎</span><span>Modifica</span></div>
+        <div class="sw-btn sw-del" onclick="deleteDesire('${d.id}')"><span>✕</span><span>Elimina</span></div>
+      </div>
+      <div class="desire-card" data-rowid="${d.id}">
+        <div class="desire-img">${imgContent}</div>
+        <div class="desire-info">
+          <div class="desire-name">${d.name}</div>
+          ${bookStr?`<div class="desire-book">${bookStr}</div>`:''}
+          <div class="desire-sub">${[priceStr,d.link?'<a href="'+d.link+'" style="color:var(--accent)">Link ↗</a>':''].filter(Boolean).join(' · ')}</div>
+        </div>
+        <span class="prio-badge prio-${d.prio}">${d.prio}</span>
+      </div>
+    </div>`;
+  }).join('');
+  addSwipe('.desire-card');
+}
+
+function sortDesires(ds){
+  const pMap={alto:3,medio:2,basso:1};
+  return ds.slice().sort((a,b)=>{
+    if(currentSort==='newest')return b.ts-a.ts;
+    if(currentSort==='oldest')return a.ts-b.ts;
+    if(currentSort==='price-asc')return (parseFloat(a.price)||0)-(parseFloat(b.price)||0);
+    if(currentSort==='price-desc')return (parseFloat(b.price)||0)-(parseFloat(a.price)||0);
+    if(currentSort==='prio-asc')return pMap[a.prio]-pMap[b.prio];
+    if(currentSort==='prio-desc')return pMap[b.prio]-pMap[a.prio];
+    return 0;
+  });
+}
+
+function setSort(el,s){
+  currentSort=s;
+  document.querySelectorAll('.sort-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');renderDetail();
+}
+
+function openDetail(id){
+  currentWL=id;currentSort='newest';
+  document.getElementById('homeView').classList.add('hidden');
+  document.getElementById('detailView').classList.add('active');
+  document.querySelectorAll('.sort-chip').forEach((c,i)=>c.classList.toggle('active',i===0));
+  renderDetail();
+}
+
+function goHome(){
+  document.getElementById('detailView').classList.remove('active');
+  document.getElementById('homeView').classList.remove('hidden');
+  currentWL=null;renderHome();
+}
+
+function toggleFab(){
+  fabOpen=!fabOpen;
+  document.getElementById('fabMenu').classList.toggle('open',fabOpen);
+  document.getElementById('fabBtn').textContent=fabOpen?'×':'+';
+}
+
+function openModal(type){
+  if(fabOpen)toggleFab();
+  if(type==='wishlist'){
+    editingWL=null;wlImgData='';
+    document.getElementById('wlModalTitle').textContent='Nuova wishlist';
+    ['wlName','wlDesc','wlImgUrl'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('wlPreview').style.display='none';
+    document.getElementById('wlToggle').classList.remove('on');
+    selIcon=ICONS[0].e;wlPrio='medio';
+    buildIconPicker();clearPrio('wl');
+    document.getElementById('overlayWL').classList.add('open');
+  } else {
+    editingD=null;dImgData='';isBook=false;
+    document.getElementById('dModalTitle').textContent='Nuovo desiderio';
+    ['dName','dImg','dLink','dAuthor','dPublisher','dPrice'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('dPreview').style.display='none';
+    document.getElementById('dToggle').classList.remove('on');
+    document.getElementById('bookToggle').classList.remove('on');
+    document.getElementById('bookFields').classList.remove('open');
+    dPrio='medio';clearPrio('d');
+    fillWLSelect(currentWL);
+    document.getElementById('overlayD').classList.add('open');
+  }
+}
+
+function toggleBookFields(){
+  isBook=!isBook;
+  document.getElementById('bookToggle').classList.toggle('on',isBook);
+  document.getElementById('bookFields').classList.toggle('open',isBook);
+}
+
+function buildIconPicker(){
+  document.getElementById('iconPicker').innerHTML=ICONS.map(i=>
+    `<div class="icon-opt${i.e===selIcon?' selected':''}" title="${i.l}" onclick="pickIcon(this,'${i.e}')">${i.e}</div>`
+  ).join('');
+}
+
+function pickIcon(el,e){
+  selIcon=e;
+  document.querySelectorAll('.icon-opt').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selPrio(el,ctx){
+  const p=el.dataset.p;
+  if(ctx==='wl')wlPrio=p; else dPrio=p;
+  el.parentNode.querySelectorAll('.prio-opt').forEach(x=>{x.className='prio-opt';});
+  el.classList.add('sel-'+p);
+}
+
+function clearPrio(ctx){
+  const sel=ctx==='wl'?'#overlayWL':'#overlayD';
+  document.querySelectorAll(sel+' .prio-opt').forEach(x=>{x.className='prio-opt';});
+}
+
+function fillWLSelect(preselect){
+  const sel=document.getElementById('dWishlist');
+  sel.innerHTML=wls.length
+    ?wls.map(w=>`<option value="${w.id}"${w.id===preselect?' selected':''}>${w.icon} ${w.name}</option>`).join('')
+    :'<option value="">— Crea prima una wishlist —</option>';
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function saveWishlist(){
+  const name=document.getElementById('wlName').value.trim();
+  if(!name){showToast('Inserisci un nome');return;}
+  const obj={
+    id:editingWL||Date.now().toString(),name,icon:selIcon,
+    imgData:wlImgData,imgUrl:document.getElementById('wlImgUrl').value.trim(),
+    desc:document.getElementById('wlDesc').value.trim(),
+    prio:wlPrio,pub:document.getElementById('wlToggle').classList.contains('on'),
+    ts:Date.now()
+  };
+  if(editingWL){const i=wls.findIndex(x=>x.id===editingWL);if(i>-1){obj.ts=wls[i].ts;wls[i]=obj;}}
+  else wls.push(obj);
+  save();renderHome();closeModal('overlayWL');
+}
+
+function saveDesire(){
+  const name=document.getElementById('dName').value.trim();
+  const wlId=document.getElementById('dWishlist').value;
+  if(!name){showToast('Inserisci un nome');return;}
+  if(!wlId){showToast('Seleziona una wishlist');return;}
+  const existing=editingD?desires.find(x=>x.id===editingD):null;
+  const obj={
+    id:editingD||Date.now().toString(),name,
+    imgData:dImgData,imgUrl:document.getElementById('dImg').value.trim(),
+    link:document.getElementById('dLink').value.trim(),
+    wlId,prio:dPrio,price:document.getElementById('dPrice').value,
+    pub:document.getElementById('dToggle').classList.contains('on'),
+    isBook,author:document.getElementById('dAuthor').value.trim(),
+    publisher:document.getElementById('dPublisher').value.trim(),
+    ts:existing?existing.ts:Date.now()
+  };
+  if(editingD){const i=desires.findIndex(x=>x.id===editingD);if(i>-1)desires[i]=obj;}
+  else desires.push(obj);
+  save();
+  if(currentWL)renderDetail(); else renderHome();
+  closeModal('overlayD');
+}
+
+function editWL(id){
+  const w=wls.find(x=>x.id===id);if(!w)return;
+  editingWL=id;selIcon=w.icon;wlPrio=w.prio;wlImgData=w.imgData||'';
+  document.getElementById('wlModalTitle').textContent='Modifica wishlist';
+  document.getElementById('wlName').value=w.name;
+  document.getElementById('wlDesc').value=w.desc||'';
+  document.getElementById('wlImgUrl').value=w.imgUrl||'';
+  const prev=document.getElementById('wlPreview');
+  const src=wlImgData||w.imgUrl||'';
+  if(src){prev.src=src;prev.style.display='block';}else prev.style.display='none';
+  document.getElementById('wlToggle').classList.toggle('on',!!w.pub);
+  buildIconPicker();clearPrio('wl');
+  document.querySelector(`#overlayWL .prio-opt[data-p="${wlPrio}"]`)?.classList.add('sel-'+wlPrio);
+  document.getElementById('overlayWL').classList.add('open');
+  resetSwipe('row-'+id);
+}
+
+function editDesire(id){
+  const d=desires.find(x=>x.id===id);if(!d)return;
+  editingD=id;dPrio=d.prio;dImgData=d.imgData||'';isBook=d.isBook||false;
+  document.getElementById('dModalTitle').textContent='Modifica desiderio';
+  document.getElementById('dName').value=d.name;
+  document.getElementById('dImg').value=d.imgUrl||'';
+  document.getElementById('dLink').value=d.link||'';
+  document.getElementById('dPrice').value=d.price||'';
+  document.getElementById('dAuthor').value=d.author||'';
+  document.getElementById('dPublisher').value=d.publisher||'';
+  const prev=document.getElementById('dPreview');
+  if(dImgData){prev.src=dImgData;prev.style.display='block';}else prev.style.display='none';
+  document.getElementById('bookToggle').classList.toggle('on',isBook);
+  document.getElementById('bookFields').classList.toggle('open',isBook);
+  document.getElementById('dToggle').classList.toggle('on',!!d.pub);
+  fillWLSelect(d.wlId);clearPrio('d');
+  document.querySelector(`#overlayD .prio-opt[data-p="${dPrio}"]`)?.classList.add('sel-'+dPrio);
+  document.getElementById('overlayD').classList.add('open');
+  resetSwipe('drow-'+id);
+}
+
+function deleteWL(id){
+  if(!confirm('Eliminare questa wishlist e tutti i suoi desideri?'))return;
+  wls=wls.filter(x=>x.id!==id);
+  desires=desires.filter(x=>x.wlId!==id);
+  save();renderHome();
+}
+
+function deleteDesire(id){
+  if(!confirm('Eliminare questo desiderio?'))return;
+  desires=desires.filter(x=>x.id!==id);
+  save();renderDetail();
+}
+
+function shareList(){
+  const url=window.location.href.split('#')[0]+'#share/'+currentWL;
+  navigator.clipboard?.writeText(url).then(()=>showToast('Link copiato!')).catch(()=>showToast('Copia manuale: '+url));
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function addSwipe(sel){
+  document.querySelectorAll(sel).forEach(card=>{
+    let sx=0;
+    card.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+    card.addEventListener('touchmove',e=>{
+      const dx=e.touches[0].clientX-sx;
+      if(dx<-8){card.style.transform=`translateX(${Math.max(dx,-128)}px)`;card.style.transition='none';}
+    },{passive:true});
+    card.addEventListener('touchend',e=>{
+      const dx=e.changedTouches[0].clientX-sx;
+      card.style.transition='transform .2s';
+      card.style.transform=dx<-60?'translateX(-128px)':'';
+    });
+  });
+}
+
+function resetSwipe(rowId){
+  const row=document.getElementById(rowId);if(!row)return;
+  const card=row.querySelector('.wl-card,.desire-card');
+  if(card){card.style.transform='';card.style.transition='transform .2s';}
+}
+
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
+});
+
+renderHome();
+</script>
+</body>
+</html>
