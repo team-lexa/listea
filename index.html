@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Listea</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Listea">
+<meta name="theme-color" content="#F9F8F5">
+<link rel="apple-touch-icon" href="/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1622,6 +1628,25 @@ document.querySelectorAll('.overlay').forEach(o=>{
     document.getElementById('forgotLink').style.display='block';
   }
 })();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').then(reg=>{
+      console.log('SW registrato',reg.scope);
+    }).catch(err=>{
+      console.log('SW errore',err);
+    });
+  });
+}
+
+// Handle share target
+const shareUrl=new URLSearchParams(window.location.search).get('fetchUrl');
+if(shareUrl){
+  window.addEventListener('DOMContentLoaded',()=>{
+    const inp=document.getElementById('fetchUrl');
+    if(inp){inp.value=shareUrl;openModal('desire');}
+  });
+}
 </script>
 </body>
 </html>
