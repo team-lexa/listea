@@ -814,42 +814,170 @@ function updateSortChips(){
 }
 
 // FETCH
+const BOOK_SITES=/ibs\.it|feltrinelli|libraccio|mondadoristore|bookdepo|amazon.*books|goodreads/i;
+const BOOK_URL=/ibs\.it|feltrinelli|libraccio|mondadoristore|bookdepo/i;
+
+// Estrae prezzo da stringa
+function extractPrice(str){
+  if(!str)return '';
+  const m=str.match(/[€$£]\s?([\d]+[.,][\d]{2})|([\d]+[.,][\d]{2})\s?[€$£]|(\d+[.,]\d{2})\s?EUR/i);
+  return m?(m[1]||m[2]||m[3]).replace(',','.'):'';
+}
+
+// Estrae dati da JSON-LD nella pagina
+function parseJsonLd(html){
+  const result={};
+  const matches=[...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)];
+  for(const m of matches){
+    try{
+      const obj=JSON.parse(m[1]);
+      const items=Array.isArray(obj)?obj:[obj];
+      for(const item of items){
+        if(item.name&&!result.title)result.title=item.name;
+        if(item.image){result.image=typeof item.image==='string'?item.image:item.image?.url||item.image?.[0]||'';}
+        if(item.offers){
+          const offer=Array.isArray(item.offers)?item.offers[0]:item.offers;
+          if(offer?.price)result.price=String(offer.price);
+        }
+        if(item.author){result.author=typeof item.author==='string'?item.author:item.author?.name||item.author?.[0]?.name||'';}
+        if(item.publisher){result.publisher=typeof item.publisher==='string'?item.publisher:item.publisher?.name||'';}
+      }
+    } catch(e){}
+  }
+  return result;
+}
+
+// Estrae Open Graph da HTML grezzo
+function parseOG(html){
+  const get=(prop)=>{const m=html.match(new RegExp(`<meta[^>]*property=["']og:${prop}["'][^>]*content=["']([^"']+)["']`,'i'));return m?m[1]:'';};
+  const getMeta=(name)=>{const m=html.match(new RegExp(`<meta[^>]*name=["']${name}["'][^>]*content=["']([^"']+)["']`,'i'));return m?m[1]:'';};
+  return{
+    title:get('title')||getMeta('title')||'',
+    image:get('image')||'',
+    description:get('description')||getMeta('description')||''
+  };
+}
+
+// Cerca su Open Library per ISBN o titolo
+async function fetchOpenLibrary(query){
+  try{
+    const isIsbn=/^[0-9X]{10,13}$/.test(query.replace(/-/g,''));
+    let url;
+    if(isIsbn){
+      url=`https://openlibrary.org/api/books?bibkeys=ISBN:${query}&format=json&jscmd=data`;
+      const res=await fetch(url);
+      const data=await res.json();
+      const book=Object.values(data)[0];
+      if(book){
+        return{
+          title:book.title||'',
+          author:book.authors?.[0]?.name||'',
+          publisher:book.publishers?.[0]?.name||'',
+          image:book.cover?.medium||book.cover?.small||''
+        };
+      }
+    } else {
+      url=`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=1&fields=title,author_name,publisher,cover_i`;
+      const res=await fetch(url);
+      const data=await res.json();
+      const book=data.docs?.[0];
+      if(book){
+        return{
+          title:book.title||'',
+          author:book.author_name?.[0]||'',
+          publisher:book.publisher?.[0]||'',
+          image:book.cover_i?`https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`:''
+        };
+      }
+    }
+  } catch(e){}
+  return null;
+}
+
 async function fetchMeta(){
   const url=document.getElementById('fetchUrl').value.trim();
   if(!url){showToast('Incolla un link prima');return;}
   const btn=document.getElementById('fetchBtn');
   btn.disabled=true;btn.innerHTML='<span class="spinner-dark"></span>';
   fetchedData=null;document.getElementById('fetchPreview').classList.remove('show');
+
+  let title='',image='',price='',author='',publisher='',note='';
+  const isBookSite=BOOK_URL.test(url);
+
   try{
+    // 1. Microlink
     const res=await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}&palette=false&audio=false&video=false&iframe=false`);
     const data=await res.json();
-    if(data.status==='success'&&data.data?.title){
-      const title=data.data.title;
-      const image=data.data?.image?.url||data.data?.logo?.url||'';
-      const isBookSite=/ibs\.it|feltrinelli|libraccio|mondadoristore|bookdepo/i.test(url);
-      fetchedData={title,image,link:url};
+    if(data.status==='success'&&data.data){
+      title=data.data.title||'';
+      image=data.data?.image?.url||data.data?.logo?.url||'';
+      const desc=data.data?.description||'';
+      price=extractPrice(title+' '+desc);
+    }
+
+    // 2. Se è sito libro e mancano dati, prova fetch diretto + JSON-LD
+    if(isBookSite&&(!title||!price)){
+      try{
+        const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const r=await fetch(proxy);
+        const d=await r.json();
+        if(d.contents){
+          const ld=parseJsonLd(d.contents);
+          const og=parseOG(d.contents);
+          if(!title)title=ld.title||og.title||title;
+          if(!image)image=ld.image||og.image||image;
+          if(!price&&ld.price)price=ld.price;
+          if(ld.author)author=ld.author;
+          if(ld.publisher)publisher=ld.publisher;
+          if(!price)price=extractPrice(d.contents.substring(0,3000));
+        }
+      } catch(e){}
+    }
+
+    // 3. Se è sito libro e abbiamo il titolo, cerca su Open Library
+    if(isBookSite&&title){
+      note='Sito libro rilevato';
+      const olData=await fetchOpenLibrary(title);
+      if(olData){
+        if(!image&&olData.image)image=olData.image;
+        if(!author&&olData.author)author=olData.author;
+        if(!publisher&&olData.publisher)publisher=olData.publisher;
+        if(olData.title&&!title)title=olData.title;
+        note='Libro trovato su Open Library ✓';
+      }
+    }
+
+    if(title){
+      fetchedData={title,image,price,link:url,author,publisher,isBook:isBookSite};
       const prevImg=document.getElementById('fetchPreviewImg');
       prevImg.src=image||'';prevImg.style.display=image?'block':'none';
       document.getElementById('fetchPreviewTitle').textContent=title;
-      document.getElementById('fetchPreviewNote').textContent=isBookSite?'Sito libro rilevato':'';
+      document.getElementById('fetchPreviewNote').textContent=note;
       document.getElementById('fetchPreview').classList.add('show');
     } else {
       document.getElementById('dLink').value=url;
       showToast('Sito non leggibile — link salvato, compila manualmente');
     }
   } catch(e){
-    document.getElementById('dLink').value=document.getElementById('fetchUrl').value.trim();
+    document.getElementById('dLink').value=url;
     showToast('Errore di connessione — link salvato, compila manualmente');
   }
   btn.disabled=false;btn.textContent='Importa';
 }
+
 function applyFetch(){
   if(!fetchedData)return;
   if(fetchedData.title)document.getElementById('dName').value=fetchedData.title;
   if(fetchedData.link)document.getElementById('dLink').value=fetchedData.link;
+  if(fetchedData.price)document.getElementById('dPrice').value=fetchedData.price;
   if(fetchedData.image){document.getElementById('dImg').value=fetchedData.image;const prev=document.getElementById('dPreview');prev.src=fetchedData.image;prev.style.display='block';}
-  const isBookSite=/ibs\.it|feltrinelli|libraccio|mondadoristore|bookdepo/i.test(fetchedData.link);
-  if(isBookSite&&!isBook){isBook=true;document.getElementById('bookToggle').classList.add('on');document.getElementById('bookFields').classList.add('open');}
+  if(fetchedData.isBook||BOOK_URL.test(fetchedData.link)){
+    if(!isBook){isBook=true;document.getElementById('bookToggle').classList.add('on');document.getElementById('bookFields').classList.add('open');}
+    if(fetchedData.author)document.getElementById('dAuthor').value=fetchedData.author;
+    if(fetchedData.publisher)document.getElementById('dPublisher').value=fetchedData.publisher;
+    const bookWl=wls.find(w=>w.name==='Lista libri'||w.icon==='📚');
+    if(bookWl){const sel=document.getElementById('dWishlist');if(sel)sel.value=bookWl.id;}
+  }
   document.getElementById('fetchPreview').classList.remove('show');
   document.getElementById('fetchUrl').value='';
   fetchedData=null;showToast('Dati importati ✓');
