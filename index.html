@@ -1076,8 +1076,10 @@ function openDesireDetail(desireId,fromContext){
   let html='';
   if(d.link)html+=`<a class="desire-detail-link" href="${d.link}" target="_blank" rel="noopener">Apri link ↗</a>`;
   if(fromContext==='owner'){
-    html+=`<button class="desire-detail-edit" onclick="editDesireFromDetail('${d.id}')">Modifica</button>`;
-    html+=`<button class="desire-detail-edit" style="color:#DC2626;border-color:#FCA5A5;margin-top:8px;" onclick="deleteDesireFromDetail('${d.id}')">Elimina desiderio</button>`;
+    html+=`<div style="display:flex;gap:10px;margin-top:4px;">
+      <button class="desire-detail-edit" style="flex:1;" onclick="editDesireFromDetail('${d.id}')">✎ Modifica</button>
+      <button class="desire-detail-edit" style="color:#DC2626;border-color:#FCA5A5;width:44px;padding:12px 0;" onclick="deleteDesireFromDetail('${d.id}')">✕</button>
+    </div>`;
   }
   else{
     const isReserved=!!d.reserved_by;const isMine=currentUser&&d.reserved_by===currentUser.id;
@@ -1170,10 +1172,21 @@ async function authSubmit(){
   if(authMode==='signup'&&!result.data.session){err.style.color='#15803D';err.textContent='Registrazione completata! Controlla la email per confermare.';return;}
   if(result.data.user){
     currentUser=result.data.user;
+    if(authMode==='signup'){await createDefaultWishlist();}
     if(pendingShareId){hideAllViews();showPublicView(pendingShareId);}
     else if(pendingUserId){hideAllViews();showProfileView(pendingUserId);}
     else showApp();
   }
+}
+
+async function createDefaultWishlist(){
+  try{
+    await sb.from('wishlists').insert({
+      name:'Lista libri',icon:'📚',
+      description:null,is_public:false,
+      user_id:currentUser.id
+    });
+  } catch(e){console.log('Default wishlist error',e);}
 }
 
 async function logout(){
@@ -1471,6 +1484,14 @@ function toggleBookFields(){
   isBook=!isBook;
   document.getElementById('bookToggle').classList.toggle('on',isBook);
   document.getElementById('bookFields').classList.toggle('open',isBook);
+  // auto-seleziona lista libri se esiste
+  if(isBook){
+    const bookWl=wls.find(w=>w.name==='Lista libri'||w.icon==='📚');
+    if(bookWl){
+      const sel=document.getElementById('dWishlist');
+      if(sel)sel.value=bookWl.id;
+    }
+  }
 }
 
 function handleImgUpload(input,previewId,ctx){
