@@ -971,8 +971,10 @@ function applyFetch(){
   if(fetchedData.link)document.getElementById('dLink').value=fetchedData.link;
   if(fetchedData.price)document.getElementById('dPrice').value=fetchedData.price;
   if(fetchedData.image){document.getElementById('dImg').value=fetchedData.image;const prev=document.getElementById('dPreview');prev.src=fetchedData.image;prev.style.display='block';}
-  if(fetchedData.isBook||BOOK_URL.test(fetchedData.link)){
-    if(!isBook){isBook=true;document.getElementById('bookToggle').classList.add('on');document.getElementById('bookFields').classList.add('open');}
+  if(fetchedData.isBook||BOOK_URL.test(fetchedData.link)||fetchedData.author){
+    isBook=true;
+    document.getElementById('bookToggle').classList.add('on');
+    document.getElementById('bookFields').classList.add('open');
     if(fetchedData.author)document.getElementById('dAuthor').value=fetchedData.author;
     if(fetchedData.publisher)document.getElementById('dPublisher').value=fetchedData.publisher;
     const bookWl=wls.find(w=>w.name==='Lista libri'||w.icon==='📚');
