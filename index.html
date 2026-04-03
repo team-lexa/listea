@@ -1386,17 +1386,20 @@ function renderHome(){
     const imgSrc=w.img_data||w.img_url||'';
     const iconContent=imgSrc?`<img src="${imgSrc}" onerror="this.style.display='none'">`:`${w.icon}`;
     const isPrivate=w.is_public===false;
-    return`<div class="wl-row" id="row-${w.id}" data-id="${w.id}" draggable="true">
-      <div class="swipe-actions">
-        <div class="sw-btn sw-edit" onclick="editWL('${w.id}')"><span>✎</span><span>Modifica</span></div>
-        <div class="sw-btn sw-del" onclick="deleteWL('${w.id}')"><span>✕</span><span>Elimina</span></div>
-      </div>
+    return`<div class="wl-row" id="row-${w.id}" data-id="${w.id}">
       <div class="wl-card" data-rowid="${w.id}">
-        <div class="drag-handle" title="Tieni premuto per riordinare">⠿</div>
         <div class="wl-icon" onclick="openDetail('${w.id}')">${iconContent}</div>
         <div class="wl-info" onclick="openDetail('${w.id}')">
           <div class="wl-name">${escHtml(w.name)}</div>
           <div class="wl-meta"><span>${dc} ${dc===1?'desiderio':'desideri'}</span><span class="vis-dot ${isPrivate?'vis-priv':'vis-pub'}"></span><span>${isPrivate?'privata':'pubblica'}</span></div>
+        </div>
+        <div class="wl-menu-btn" onclick="toggleWlMenu(event,'${w.id}')">&#8943;
+          <div class="wl-context-menu" id="menu-${w.id}">
+            <div class="wl-context-item" onclick="event.stopPropagation();closeAllMenus();moveWl('${w.id}',-1)">↑ Sposta su</div>
+            <div class="wl-context-item" onclick="event.stopPropagation();closeAllMenus();moveWl('${w.id}',1)">↓ Sposta giù</div>
+            <div class="wl-context-item" onclick="event.stopPropagation();closeAllMenus();editWL('${w.id}')">✎ Modifica</div>
+            <div class="wl-context-item danger" onclick="event.stopPropagation();closeAllMenus();deleteWL('${w.id}')">✕ Elimina</div>
+          </div>
         </div>
       </div>
     </div>`;
