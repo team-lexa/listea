@@ -589,8 +589,16 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="field"><label>Link prodotto</label><input type="url" id="dLink" placeholder="https://..."></div>
     <div class="field"><label>Wishlist</label><select id="dWishlist"></select></div>
-    <div class="field"><label>Priorità</label><div class="prio-row"><div class="prio-opt" data-p="alto" onclick="selPrio(this)">Alto</div><div class="prio-opt" data-p="medio" onclick="selPrio(this)">Medio</div><div class="prio-opt" data-p="basso" onclick="selPrio(this)">Basso</div></div></div>
+    <div class="field"><label>Priorità</label><div class="prio-row"><div class="prio-opt" data-p="alto" onclick="selPrio(this)">Lo voglio</div><div class="prio-opt" data-p="medio" onclick="selPrio(this)">Lo vorrei</div><div class="prio-opt" data-p="basso" onclick="selPrio(this)">Prima o poi</div></div></div>
     <div class="field"><label>Prezzo (€)</label><input type="number" id="dPrice" placeholder="0.00" step="0.01" min="0"></div>
+    <div class="field">
+      <label>Note</label>
+      <textarea id="dNotes" placeholder="Es. taglia M, shade N20, edizione illustrata..." style="height:60px;"></textarea>
+      <div class="toggle-row" style="margin-top:8px;">
+        <span style="font-size:12px;color:var(--text2);">Note visibili nella wishlist pubblica</span>
+        <div class="toggle" id="dNotesPublic" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
     <div class="field"><div class="toggle-row"><span>Desiderio privato</span><div class="toggle" id="dToggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div></div></div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('overlayD')">Annulla</button>
@@ -1217,8 +1225,9 @@ function openDesireDetail(desireId,fromContext){
   const priceEl=document.getElementById('desireDetailPrice');priceEl.textContent=d.price?`€${parseFloat(d.price).toFixed(2)}`:'';priceEl.style.display=d.price?'block':'none';
   const meta=document.getElementById('desireDetailMeta');
   const rows=[];
-  if(d.priority)rows.push(`<div class="desire-detail-row"><span class="desire-detail-label">Priorità</span><span class="prio-badge prio-${d.priority}">${d.priority}</span></div>`);
+  if(d.priority)rows.push(`<div class="desire-detail-row"><span class="desire-detail-label">Priorità</span><span class="prio-badge prio-${d.priority}">${prioLabel(d.priority)}</span></div>`);
   if(d.is_book&&d.publisher)rows.push(`<div class="desire-detail-row"><span class="desire-detail-label">Editore</span><span class="desire-detail-value">${escHtml(d.publisher)}</span></div>`);
+  if(d.notes&&(d.notes_public||fromContext==='owner'))rows.push(`<div class="desire-detail-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><span class="desire-detail-label">Note${fromContext==='owner'&&!d.notes_public?' (private)':''}</span><span class="desire-detail-value" style="white-space:pre-wrap;">${escHtml(d.notes)}</span></div>`);
   meta.innerHTML=rows.join('');meta.style.display=rows.length?'flex':'none';
   const actions=document.getElementById('desireDetailActions');
   let html='';
@@ -1413,6 +1422,7 @@ async function showPublicView(wlId,fromProfile){
         <div class="public-desire-name">${escHtml(d.name)}</div>
         ${bookStr?`<div class="public-desire-book">${bookStr}</div>`:''}
         <div class="public-desire-sub">${priceStr}</div>
+        ${d.notes&&d.notes_public?`<div style="font-size:11px;color:var(--text2);margin-top:2px;font-style:italic;">${escHtml(d.notes)}</div>`:''}
       </div>${actionHtml}
     </div></div>`;
   }).join('');
@@ -1547,7 +1557,7 @@ function renderDetail(){
           ${bookStr?`<div class="desire-book">${bookStr}</div>`:''}
           <div class="desire-sub">${priceStr}</div>
         </div>
-        <span class="prio-badge prio-${d.priority}">${d.priority}</span>
+        <span class="prio-badge prio-${d.priority}">${prioLabel(d.priority)}</span>
       </div>
     </div>`;
   }).join('');
@@ -1591,7 +1601,7 @@ function openModal(type){
   } else {
     editingD=null;dImgData='';isBook=false;fetchedData=null;
     document.getElementById('dModalTitle').textContent='Nuovo desiderio';
-    ['dName','dImg','dLink','dAuthor','dPublisher','dPrice','fetchUrl'].forEach(id=>document.getElementById(id).value='');
+    ['dName','dImg','dLink','dAuthor','dPublisher','dPrice','fetchUrl','dNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('dNotesPublic').classList.remove('on');
     document.getElementById('dPreview').style.display='none';
     document.getElementById('dToggle').classList.remove('on');
     document.getElementById('bookToggle').classList.remove('on');
@@ -1648,7 +1658,8 @@ async function saveDesire(){
   const isPrivate=document.getElementById('dToggle').classList.contains('on');
   const priceVal=document.getElementById('dPrice').value;
   const imgUrl=document.getElementById('dImg').value.trim();
-  const obj={name,img_data:dImgData||null,img_url:imgUrl||null,fetched_image:(!dImgData&&!imgUrl&&fetchedData?.image)?fetchedData.image:null,link:document.getElementById('dLink').value.trim()||null,wishlist_id:wlId,priority:dPrio,price:priceVal?parseFloat(priceVal):null,is_public:!isPrivate,is_book:isBook,author:document.getElementById('dAuthor').value.trim()||null,publisher:document.getElementById('dPublisher').value.trim()||null,user_id:currentUser.id};
+  const notesVal=document.getElementById('dNotes').value.trim();const notesPublic=document.getElementById('dNotesPublic').classList.contains('on');
+const obj={name,img_data:dImgData||null,img_url:imgUrl||null,fetched_image:(!dImgData&&!imgUrl&&fetchedData?.image)?fetchedData.image:null,link:document.getElementById('dLink').value.trim()||null,wishlist_id:wlId,priority:dPrio,price:priceVal?parseFloat(priceVal):null,is_public:!isPrivate,is_book:isBook,author:document.getElementById('dAuthor').value.trim()||null,publisher:document.getElementById('dPublisher').value.trim()||null,notes:notesVal||null,notes_public:notesPublic,user_id:currentUser.id};
   let error;
   if(editingD){({error}=await sb.from('desires').update(obj).eq('id',editingD));if(!error){const i=desires.findIndex(x=>x.id===editingD);if(i>-1)desires[i]={...desires[i],...obj};}}
   else{const {data,error:e}=await sb.from('desires').insert(obj).select().single();error=e;if(!error&&data)desires.unshift(data);}
@@ -1683,6 +1694,8 @@ function editDesire(id){
   document.getElementById('dPrice').value=d.price||'';
   document.getElementById('dAuthor').value=d.author||'';
   document.getElementById('dPublisher').value=d.publisher||'';
+  document.getElementById('dNotes').value=d.notes||'';
+  document.getElementById('dNotesPublic').classList.toggle('on',d.notes_public||false);
   document.getElementById('fetchUrl').value='';
   document.getElementById('fetchPreview').classList.remove('show');
   const prev=document.getElementById('dPreview');
@@ -1773,6 +1786,7 @@ async function skipOnboarding(){
   showApp();
 }
 
+function prioLabel(p){return p==='alto'?'Lo voglio':p==='medio'?'Lo vorrei':'Prima o poi';}
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 document.querySelectorAll('.overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});});
