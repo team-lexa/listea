@@ -968,31 +968,35 @@ async function fetchMeta(){
     try{
       setFetchStatus('Cerco informazioni...');
       const res=await fetchWithTimeout(`https://api.microlink.io?url=${encodeURIComponent(url)}&palette=false&audio=false&video=false&iframe=false`,4000);
-      const data=await res.json();
-      if(data.status==='success'&&data.data){
-        title=data.data.title||'';
-        image=data.data?.image?.url||data.data?.logo?.url||'';
-        const desc=data.data?.description||'';
-        price=extractPrice(title+' '+desc);
+      if(res.ok){
+        const data=await res.json();
+        if(data.status==='success'&&data.data){
+          title=data.data.title||'';
+          image=data.data?.image?.url||data.data?.logo?.url||'';
+          const desc=data.data?.description||'';
+          price=extractPrice(title+' '+desc);
+        }
       }
     } catch(e){}
 
-    // 2. Fallback fetch diretto per siti libro
-    if(isBookSite&&(!title||!price)){
+    // 2. Fallback fetch diretto per tutti i siti se mancano dati
+    if(!title){
       try{
-        setFetchStatus('Cerco dettagli libro...');
+        setFetchStatus('Provo un altro metodo...');
         const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
         const r=await fetchWithTimeout(proxy,4000);
         const d=await r.json();
         if(d.contents){
           const ld=parseJsonLd(d.contents);
           const og=parseOG(d.contents);
-          if(!title)title=ld.title||og.title||title;
-          if(!image)image=ld.image||og.image||image;
+          title=ld.title||og.title||'';
+          if(!image)image=ld.image||og.image||'';
           if(!price&&ld.price)price=ld.price;
-          if(ld.author)author=ld.author;
-          if(ld.publisher)publisher=ld.publisher;
-          if(!price)price=extractPrice(d.contents.substring(0,3000));
+          if(isBookSite){
+            if(ld.author)author=ld.author;
+            if(ld.publisher)publisher=ld.publisher;
+            if(!price)price=extractPrice(d.contents.substring(0,3000));
+          }
         }
       } catch(e){}
     }
