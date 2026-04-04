@@ -313,10 +313,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
     <div class="auth-tab active" onclick="switchTab('login')">Accedi</div>
     <div class="auth-tab" onclick="switchTab('signup')">Registrati</div>
   </div>
-  <div class="auth-field"><label>Email</label><input type="email" id="authEmail" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')authSubmit()"></div>
+  <div class="auth-field"><label>Email</label><input type="email" id="authEmail" placeholder="tu@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')authSubmit()"></div>
   <div class="auth-field">
     <label>Password</label>
-    <input type="password" id="authPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()">
+    <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')authSubmit()">
     <span class="pw-eye" id="pwEye" onclick="togglePw()">👁</span>
   </div>
   <button class="auth-btn" id="authBtn" onclick="authSubmit()">Accedi</button>
@@ -330,7 +330,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
   <div class="auth-logo">Listea</div>
   <div class="auth-sub" style="margin-bottom:20px;">Reimposta password</div>
   <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6;">Inserisci la tua email e ti mandiamo un link per reimpostare la password.</p>
-  <div class="auth-field"><label>Email</label><input type="email" id="resetEmail" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')sendReset()"></div>
+  <div class="auth-field"><label>Email</label><input type="email" id="resetEmail" placeholder="tu@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')sendReset()"></div>
   <button class="auth-btn" id="resetBtn" onclick="sendReset()">Invia link</button>
   <div class="auth-err" id="resetErr"></div>
   <div class="auth-link" onclick="showAuthView()" style="margin-top:16px;">← Torna al login</div>
@@ -342,7 +342,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
   <div class="auth-sub" style="margin-bottom:20px;">Nuova password</div>
   <div class="auth-field">
     <label>Nuova password</label>
-    <input type="password" id="newPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')updatePassword()">
+    <input type="password" id="newPassword" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')updatePassword()">
     <span class="pw-eye" onclick="togglePwNew()">👁</span>
   </div>
   <button class="auth-btn" id="newPwBtn" onclick="updatePassword()">Salva password</button>
