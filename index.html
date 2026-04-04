@@ -702,7 +702,15 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
 <script>
 const SUPABASE_URL='https://gcxrootmhemvlvcpcydn.supabase.co';
 const SUPABASE_KEY='sb_publishable_bZRBU4kXiEsc19c5kZJFrQ_Hs8RkjcH';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+  auth:{
+    persistSession:true,
+    autoRefreshToken:true,
+    detectSessionInUrl:true,
+    storageKey:'listea-auth',
+    storage:window.localStorage
+  }
+});
 
 const ICON_CATS=[
   {label:'Generale',icons:['📚','✈️','👗','💄','🎮','🏠','🍽️','🎵','🌿','💻','🎨','🐾']},
