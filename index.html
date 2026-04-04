@@ -1628,7 +1628,14 @@ async function saveWishlist(){
   else{const {data,error:e}=await sb.from('wishlists').insert(obj).select().single();error=e;if(!error&&data)wls.push(data);}
   btn.disabled=false;btn.textContent='Salva';
   if(error){showToast('Errore: '+error.message);return;}
-  renderHome();closeModal('overlayWL');
+  renderHome();
+  closeModal('overlayWL');
+  // se eravamo dentro una lista, torna alla lista
+  if(editingWL&&currentWL===editingWL){
+    document.getElementById('tabHome').style.display='none';
+    document.getElementById('tabLists').style.display='block';
+    renderDetail();
+  }
 }
 
 async function saveDesire(){
@@ -1648,8 +1655,17 @@ const obj={name,img_data:dImgData||null,img_url:imgUrl||null,fetched_image:(!dIm
   else{const {data,error:e}=await sb.from('desires').insert(obj).select().single();error=e;if(!error&&data)desires.unshift(data);}
   btn.disabled=false;btn.textContent='Salva';
   if(error){showToast('Errore: '+error.message);return;}
-  if(currentWL)renderDetail();else renderHome();
-  renderTopDesires();closeModal('overlayD');
+  closeModal('overlayD');
+  if(currentWL){
+    document.getElementById('tabHome').style.display='none';
+    document.getElementById('tabLists').style.display='block';
+    renderDetail();
+  } else {
+    document.getElementById('tabLists').style.display='none';
+    document.getElementById('tabHome').style.display='block';
+    renderHome();
+  }
+  renderTopDesires();
 }
 
 function editWL(id){
