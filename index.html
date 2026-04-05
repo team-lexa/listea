@@ -820,7 +820,7 @@ async function changeEmail(){
   const {error}=await sb.auth.updateUser({email:newEmail});
   btn.disabled=false;btn.textContent='Invia conferma';
   if(error){err.textContent='Errore: '+error.message;return;}
-  err.style.color='#15803D';err.textContent='Conferma inviata! Controlla la nuova email.';
+  err.style.color='#15803D';err.textContent='Conferma inviata! Apri la nuova email e clicca il link per completare il cambio.';
   setTimeout(()=>closeModal('overlayChangeEmail'),2500);
 }
 async function changePassword(){
@@ -1834,7 +1834,18 @@ document.querySelectorAll('.overlay').forEach(o=>{o.addEventListener('click',e=>
   const shareId=params.get('share');
   const userId=params.get('user');
   const isReset=params.get('reset');
-  sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){hideAllViews();document.getElementById('newPasswordView').style.display='block';}});
+  sb.auth.onAuthStateChange((event,session)=>{
+    if(event==='PASSWORD_RECOVERY'){
+      hideAllViews();
+      document.getElementById('newPasswordView').style.display='block';
+    }
+    if(event==='USER_UPDATED'&&session?.user){
+      currentUser=session.user;
+      const emailEl=document.getElementById('currentEmailDisplay');
+      if(emailEl)emailEl.textContent=session.user.email||'';
+      showToast('Email aggiornata ✓');
+    }
+  });;
   if(isReset){hideAllViews();document.getElementById('newPasswordView').style.display='block';}
   else if(shareId){
     if(currentUser){const {data:wl}=await sb.from('wishlists').select('user_id').eq('id',shareId).single();if(wl&&wl.user_id===currentUser.id){showApp();return;}}
