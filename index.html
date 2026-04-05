@@ -507,6 +507,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
         <div><div class="profile-action-label">Chi siamo</div><div class="profile-action-sub">Il progetto, la visione, i contatti</div></div>
         <span class="profile-action-arrow">›</span>
       </div>
+      <div class="profile-action-row" onclick="openSearchModal()">
+        <div><div class="profile-action-label">Cerca utente</div><div class="profile-action-sub">Trova un profilo per username</div></div>
+        <span class="profile-action-arrow">›</span>
+      </div>
     </div>
     <div class="donate-banner">
       <p>Listea è gratuita e lo resterà sempre.<br>Se ti piace, puoi supportarla con una donazione ♡</p>
@@ -592,7 +596,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
         </div>
       </div>
       <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.6;">
-        Funziona con Amazon, IBS, Feltrinelli, Libraccio, Flaconi, ASOS, Mediaworld e altri.<br>
+        Funziona con Amazon, IBS, Feltrinelli, Libraccio, Mediaworld, Notino, Flaconi e altri.<br>
         <span style="font-style:italic;">Alcuni siti potrebbero non essere supportati.</span>
       </div>
     </div>
@@ -713,6 +717,23 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="modal-actions" style="margin-top:24px;">
       <button class="btn-primary" onclick="document.getElementById('overlayAbout').classList.remove('open')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CERCA UTENTE -->
+<div class="overlay" id="overlaySearch">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Cerca utente</div>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="searchUsername" placeholder="Es. laura" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')" onkeydown="if(event.key==='Enter')searchUser()">
+    </div>
+    <div id="searchResult" style="min-height:48px;"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('overlaySearch')">Chiudi</button>
+      <button class="btn-primary" id="searchBtn" onclick="searchUser()">Cerca</button>
     </div>
   </div>
 </div>
@@ -1822,6 +1843,43 @@ async function skipOnboarding(){
   },{onConflict:'id'});
   userProfile={id:currentUser.id,display_name:currentUser.email.split('@')[0],is_public:false};
   showApp();
+}
+
+// CERCA UTENTE
+function openSearchModal(){
+  document.getElementById('searchUsername').value='';
+  document.getElementById('searchResult').innerHTML='';
+  document.getElementById('overlaySearch').classList.add('open');
+  setTimeout(()=>document.getElementById('searchUsername').focus(),300);
+}
+async function searchUser(){
+  const username=document.getElementById('searchUsername').value.trim();
+  const result=document.getElementById('searchResult');
+  if(!username){result.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0;">Inserisci uno username</div>';return;}
+  const btn=document.getElementById('searchBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Cerco...';
+  result.innerHTML='';
+  const {data:profile,error}=await sb.from('profiles').select('id,username,display_name,avatar_data,is_public').eq('username',username).single();
+  btn.disabled=false;btn.textContent='Cerca';
+  if(error||!profile||!profile.is_public){
+    result.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0;">Nessun utente trovato con questo username.</div>';
+    return;
+  }
+  const avatarHtml=profile.avatar_data
+    ?`<img src="${profile.avatar_data}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+    :`<div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--accent-dark);flex-shrink:0;">${(profile.display_name||username).charAt(0).toUpperCase()}</div>`;
+  result.innerHTML=`<div onclick="goToProfile('${profile.id}')" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radiusS);background:var(--surface2);cursor:pointer;margin-top:8px;">
+    ${avatarHtml}
+    <div>
+      <div style="font-size:14px;font-weight:500;">${escHtml(profile.display_name||username)}</div>
+      <div style="font-size:12px;color:var(--text3);">@${escHtml(profile.username)}</div>
+    </div>
+    <span style="margin-left:auto;color:var(--text3);font-size:18px;">›</span>
+  </div>`;
+}
+function goToProfile(userId){
+  closeModal('overlaySearch');
+  showProfileView(userId);
 }
 
 function prioLabel(p){return p==='alto'?'Lo voglio':p==='medio'?'Lo vorrei':'Prima o poi';}
