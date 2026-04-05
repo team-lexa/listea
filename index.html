@@ -503,12 +503,12 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
         <div><div class="profile-action-label">Cambia password</div><div class="profile-action-sub">Aggiorna la tua password</div></div>
         <span class="profile-action-arrow">›</span>
       </div>
-      <div class="profile-action-row" onclick="document.getElementById('overlayAbout').classList.add('open')">
-        <div><div class="profile-action-label">Chi siamo</div><div class="profile-action-sub">Il progetto, la visione, i contatti</div></div>
-        <span class="profile-action-arrow">›</span>
-      </div>
       <div class="profile-action-row" onclick="openSearchModal()">
         <div><div class="profile-action-label">Cerca utente</div><div class="profile-action-sub">Trova un profilo per username</div></div>
+        <span class="profile-action-arrow">›</span>
+      </div>
+      <div class="profile-action-row" onclick="document.getElementById('overlayAbout').classList.add('open')">
+        <div><div class="profile-action-label">Chi siamo</div><div class="profile-action-sub">Il progetto, la visione, i contatti</div></div>
         <span class="profile-action-arrow">›</span>
       </div>
     </div>
@@ -543,7 +543,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
 <div class="overlay" id="overlayWL">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="wlModalTitle">Nuova wishlist</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div class="modal-title" style="margin-bottom:0;" id="wlModalTitle">Nuova wishlist</div>
+      <button onclick="closeModal('overlayWL')" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
     <div class="field"><label>Nome</label><input type="text" id="wlName" placeholder="Es. Compleanno 2025"></div>
     <div class="field">
       <label>Icona categoria</label>
@@ -573,12 +576,11 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
 <div class="overlay" id="overlayD">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="dModalTitle">Nuovo desiderio</div>
-    <div class="book-toggle-row" onclick="toggleBookFields()"><span>📖 È un libro?</span><div class="toggle" id="bookToggle" onclick="event.stopPropagation();toggleBookFields()"><div class="toggle-thumb"></div></div></div>
-    <div class="book-fields" id="bookFields">
-      <div class="field"><label>Autore</label><input type="text" id="dAuthor" placeholder="Es. Italo Calvino"></div>
-      <div class="field"><label>Editore</label><input type="text" id="dPublisher" placeholder="Es. Einaudi"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div class="modal-title" style="margin-bottom:0;" id="dModalTitle">Nuovo desiderio</div>
+      <button onclick="closeModal('overlayD')" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center;">×</button>
     </div>
+    <div class="book-toggle-row" onclick="toggleBookFields()"><span>📖 È un libro?</span><div class="toggle" id="bookToggle" onclick="event.stopPropagation();toggleBookFields()"><div class="toggle-thumb"></div></div></div>
     <div class="field">
       <label>Importa da link</label>
       <div class="fetch-box">
@@ -601,6 +603,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
     <div class="field"><label>Titolo *</label><input type="text" id="dName" placeholder="Es. Occhiali da sole"></div>
+    <div class="book-fields" id="bookFields">
+      <div class="field"><label>Autore</label><input type="text" id="dAuthor" placeholder="Es. Italo Calvino"></div>
+      <div class="field"><label>Editore</label><input type="text" id="dPublisher" placeholder="Es. Einaudi"></div>
+    </div>
     <div class="field">
       <label>Immagine</label>
       <div class="img-upload-area" onclick="document.getElementById('dFileInput').click()">
@@ -1571,7 +1577,6 @@ function renderHome(){
       </div>
     </div>`;
   }).join('');
-  addSwipe('.wl-card');
   topFilterWL='all';showAllTop=false;
   renderTopDesires();
 }
