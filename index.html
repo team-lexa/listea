@@ -641,7 +641,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
 <div class="overlay" id="overlayProfile">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Il tuo profilo</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div class="modal-title" style="margin-bottom:0;">Il tuo profilo</div>
+      <button onclick="closeModal('overlayProfile')" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
     <div class="avatar-upload-wrap">
       <div class="avatar-preview" id="modalAvatarPreview"><span id="modalAvatarInitial">L</span></div>
       <div>
@@ -656,7 +659,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
       <input type="text" id="profileUsername" placeholder="Es. laura" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'');updateProfileUrlPreview()">
     </div>
     <div id="profileUrlPreview" style="font-size:12px;color:var(--text3);margin-top:-8px;margin-bottom:14px;"></div>
-    <div class="field"><div class="toggle-row"><span>Profilo pubblico</span><div class="toggle" id="profileToggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div></div></div>
+    <div class="field">
+      <div class="toggle-row"><span>Profilo pubblico</span><div class="toggle" id="profileToggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic;line-height:1.5;">Se passi a profilo privato non potrai condividere le tue liste con altri.</div>
+    </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('overlayProfile')">Annulla</button>
       <button class="btn-primary" id="profileSaveBtn" onclick="saveProfile()">Salva</button>
@@ -1229,6 +1235,7 @@ function openProfileModal(){
   const avatarData=userProfile?.avatar_data||newAvatarData||'';
   modalAvatarData='';
   document.getElementById('profileDisplayName').value=name;
+  document.getElementById('profileBirthday').value=userProfile?.birthday||'';
   document.getElementById('profileUsername').value=userProfile?.username||'';
   document.getElementById('profileToggle').classList.toggle('on',userProfile?.is_public!==false);
   updateProfileUrlPreview();
@@ -1249,7 +1256,8 @@ async function saveProfile(){
   if(!displayName){showToast('Inserisci un nome');return;}
   const btn=document.getElementById('profileSaveBtn');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Salvo...';
-  const obj={id:currentUser.id,display_name:displayName,username:username||null,is_public:isPublic};
+  const birthday=document.getElementById('profileBirthday').value||null;
+  const obj={id:currentUser.id,display_name:displayName,username:username||null,is_public:isPublic,birthday};
   if(modalAvatarData)obj.avatar_data=modalAvatarData;
   const {error}=await sb.from('profiles').upsert(obj,{onConflict:'id'});
   btn.disabled=false;btn.textContent='Salva';
@@ -1504,6 +1512,12 @@ async function showProfileView(userId){
     :`<div style="width:52px;height:52px;border-radius:50%;background:#F7F0DC;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22px;color:#7A5A00;margin-bottom:10px;">${displayName.charAt(0).toUpperCase()}</div>`;
   document.getElementById('profilePubAvatar').innerHTML=avatarHtml;
   document.getElementById('profilePubTitle').textContent='Le wishlist di '+displayName;
+  if(profile?.birthday){
+    const bday=new Date(profile.birthday);
+    const options={day:'numeric',month:'long'};
+    const formatted=bday.toLocaleDateString('it-IT',options);
+    document.getElementById('profilePubSubtitle').textContent='🎂 '+formatted;
+  }
   const {data:lists}=await sb.from('wishlists').select('*').eq('user_id',userId).eq('is_public',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false});
   document.getElementById('profilePubLoading').style.display='none';
   const pubLists=lists||[];
@@ -1684,7 +1698,12 @@ function fillWLSelect(preselect){
   sel.innerHTML=opts+'<option value="__new__">＋ Crea nuova wishlist</option>';
   sel.onchange=function(){if(this.value==='__new__'){this.value=wls.length?wls[0].id:'';closeModal('overlayD');setTimeout(()=>openModal('wishlist'),200);}};
 }
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModal(id){
+  const el=document.getElementById(id);
+  el.classList.remove('open');
+  el.style.pointerEvents='none';
+  setTimeout(()=>el.style.pointerEvents='',300);
+}
 
 async function saveWishlist(){
   const name=document.getElementById('wlName').value.trim();
