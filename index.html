@@ -786,6 +786,23 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
+<!-- MODAL SALVA DESIDERIO -->
+<div class="overlay" id="overlaySaveDesire">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div class="modal-title" style="margin-bottom:0;">Salva nella tua lista</div>
+      <button onclick="closeModal('overlaySaveDesire')" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;" id="saveDesireName"></p>
+    <div class="field"><label>Scegli la wishlist</label><select id="saveDesireWishlist"></select></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('overlaySaveDesire')">Annulla</button>
+      <button class="btn-primary" id="saveDesireBtn" onclick="confirmSaveDesire()">Salva</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1504,10 +1521,11 @@ async function showPublicView(wlId,fromProfile){
     const bookStr=d.is_book&&d.author?`${escHtml(d.author)}${d.publisher?' · '+escHtml(d.publisher):''}`:'';
     const isReserved=!!d.reserved_by;const isMine=currentUser&&d.reserved_by===currentUser.id;
     let actionHtml='';
+    const saveBtn=currentUser&&!isOwner?`<button class="reserve-btn" onclick="event.stopPropagation();openSaveDesireModal('${d.id}')" style="margin-left:4px;">+ Salva</button>`:'';
     if(isOwner)actionHtml='';
-    else if(isMine)actionHtml=`<button class="reserve-btn mine" onclick="event.stopPropagation();unreserve('${d.id}')">Libera ✕</button>`;
-    else if(isReserved)actionHtml=`<span class="reserved-tag">Prenotato</span>`;
-    else if(currentUser)actionHtml=`<button class="reserve-btn" onclick="event.stopPropagation();reserve('${d.id}')">Prenoto ♡</button>`;
+    else if(isMine)actionHtml=`<div style="display:flex;gap:4px;flex-shrink:0;"><button class="reserve-btn mine" onclick="event.stopPropagation();unreserve('${d.id}')">Libera ✕</button>${saveBtn}</div>`;
+    else if(isReserved)actionHtml=`<div style="display:flex;gap:4px;flex-shrink:0;"><span class="reserved-tag">Prenotato</span>${saveBtn}</div>`;
+    else if(currentUser)actionHtml=`<div style="display:flex;gap:4px;flex-shrink:0;"><button class="reserve-btn" onclick="event.stopPropagation();reserve('${d.id}')">Prenoto ♡</button>${saveBtn}</div>`;
     else actionHtml=`<button class="reserve-btn" onclick="event.stopPropagation();showAuthFromPublic()">Prenoto ♡</button>`;
     return`<div class="public-desire-row"><div class="public-desire-card${isReserved&&!isMine?' reserved':''}" onclick="openDesireDetail('${d.id}','${isOwner?'owner':'public'}')">
       <div class="public-desire-img">${imgContent}</div>
@@ -1908,6 +1926,49 @@ async function skipOnboarding(){
   },{onConflict:'id'});
   userProfile={id:currentUser.id,display_name:currentUser.email.split('@')[0],is_public:false};
   showApp();
+}
+
+// SALVA DESIDERIO DA LISTA PUBBLICA
+let desireToSave=null;
+function openSaveDesireModal(desireId){
+  const d=pubDesires.find(x=>x.id===desireId)||desires.find(x=>x.id===desireId);
+  if(!d)return;
+  desireToSave=d;
+  document.getElementById('saveDesireName').textContent='"'+d.name+'"';
+  const sel=document.getElementById('saveDesireWishlist');
+  sel.innerHTML=wls.map(w=>`<option value="${w.id}">${w.icon} ${escHtml(w.name)}</option>`).join('');
+  // preseleziona lista libri se è un libro
+  if(d.is_book){const bookWl=wls.find(w=>w.name==='Lista libri'||w.icon==='📚');if(bookWl)sel.value=bookWl.id;}
+  document.getElementById('overlaySaveDesire').classList.add('open');
+}
+async function confirmSaveDesire(){
+  if(!desireToSave)return;
+  const wlId=document.getElementById('saveDesireWishlist').value;
+  if(!wlId){showToast('Seleziona una wishlist');return;}
+  const btn=document.getElementById('saveDesireBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Salvo...';
+  const obj={
+    name:desireToSave.name,
+    img_data:desireToSave.img_data||null,
+    img_url:desireToSave.img_url||null,
+    fetched_image:desireToSave.fetched_image||null,
+    link:desireToSave.link||null,
+    wishlist_id:wlId,
+    priority:'medio',
+    is_public:true,
+    is_book:desireToSave.is_book||false,
+    author:desireToSave.author||null,
+    publisher:desireToSave.publisher||null,
+    price:desireToSave.price||null,
+    user_id:currentUser.id
+  };
+  const {data,error}=await sb.from('desires').insert(obj).select().single();
+  btn.disabled=false;btn.textContent='Salva';
+  if(error){showToast('Errore: '+error.message);return;}
+  if(data)desires.unshift(data);
+  closeModal('overlaySaveDesire');
+  showToast('Salvato nella tua lista ✓');
+  desireToSave=null;
 }
 
 // ELIMINA ACCOUNT
