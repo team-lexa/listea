@@ -395,6 +395,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
 
 <!-- PUBLIC PROFILE -->
 <div id="profileView">
+  <div class="detail-header" style="border-bottom:1px solid var(--border);">
+    <button class="back-btn" onclick="goBackFromProfile()">←</button>
+    <div style="flex:1;"></div>
+  </div>
   <div class="public-header">
     <div class="public-logo">Listea</div>
     <div id="profilePubAvatar"></div>
@@ -1549,6 +1553,11 @@ async function unreserve(id){
   const {error}=await sb.from('desires').update({reserved_by:null,reserved_at:null}).eq('id',id).eq('reserved_by',currentUser.id);
   if(error){showToast('Errore');return;}
   showToast('Prenotazione rimossa');showPublicView(pendingShareId);
+}
+function goBackFromProfile(){
+  hideAllViews();
+  document.getElementById('appView').style.display='block';
+  switchTab_nav('profile');
 }
 function goBackToProfile(){if(pendingUserId)showProfileView(pendingUserId);else{hideAllViews();if(currentUser)showApp();else document.getElementById('authView').style.display='block';}}
 
