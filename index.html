@@ -2092,6 +2092,28 @@ document.querySelectorAll('.overlay').forEach(o=>{o.addEventListener('click',e=>
   else{document.getElementById('authView').style.display='block';document.getElementById('forgotLink').style.display='block';}
 })();
 
+// Offline detection
+window.addEventListener('online', ()=>document.getElementById('offlineBanner')?.remove());
+window.addEventListener('offline', ()=>{
+  if(!document.getElementById('offlineBanner')){
+    const banner=document.createElement('div');
+    banner.id='offlineBanner';
+    banner.style.cssText='position:fixed;top:0;left:0;right:0;background:#111110;color:#F9F8F5;text-align:center;padding:10px 16px;font-size:13px;z-index:999;font-family:DM Sans,sans-serif;';
+    banner.textContent='✦ Sei offline — connettiti a una rete per usare Listea';
+    document.body.prepend(banner);
+  }
+});
+// Check on load
+if(!navigator.onLine){
+  window.addEventListener('DOMContentLoaded',()=>{
+    const banner=document.createElement('div');
+    banner.id='offlineBanner';
+    banner.style.cssText='position:fixed;top:0;left:0;right:0;background:#111110;color:#F9F8F5;text-align:center;padding:10px 16px;font-size:13px;z-index:999;font-family:DM Sans,sans-serif;';
+    banner.textContent='✦ Sei offline — connettiti a una rete per usare Listea';
+    document.body.prepend(banner);
+  });
+}
+
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     const reg=await navigator.serviceWorker.register('/sw.js');
