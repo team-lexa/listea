@@ -623,7 +623,12 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
       <input type="url" id="dImg" placeholder="URL immagine https://...">
     </div>
     <div class="field"><label>Link prodotto</label><input type="url" id="dLink" placeholder="https://..."></div>
-    <div class="field"><label>Wishlist</label><select id="dWishlist"></select></div>
+    <div class="field">
+      <label>Wishlist</label>
+      <select id="dWishlist"></select>
+      <button id="newWlFromDesireBtn" onclick="createWlFromDesire()" style="display:none;width:100%;margin-top:8px;padding:12px;background:var(--accent-light);color:var(--accent-dark);border:1px solid var(--accent);border-radius:var(--radiusS);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent;">＋ Crea la tua prima wishlist</button>
+      <button id="newWlBtn2" onclick="createWlFromDesire()" style="display:none;width:100%;margin-top:8px;padding:10px;background:transparent;color:var(--accent-dark);border:1px solid var(--border);border-radius:var(--radiusS);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;">＋ Crea nuova wishlist</button>
+    </div>
     <div class="field"><label>Priorità</label><div class="prio-row"><div class="prio-opt" data-p="alto" onclick="selPrio(this)">Lo voglio</div><div class="prio-opt" data-p="medio" onclick="selPrio(this)">Lo vorrei</div><div class="prio-opt" data-p="basso" onclick="selPrio(this)">Prima o poi</div></div></div>
     <div class="field"><label>Prezzo (€)</label><input type="number" id="dPrice" placeholder="0.00" step="0.01" min="0"><div style="font-size:11px;color:var(--text3);margin-top:5px;font-style:italic;">Verifica che il prezzo importato sia corretto.</div></div>
     <div class="field">
@@ -1432,7 +1437,6 @@ async function authSubmit(){
   if(result.data.user){
     currentUser=result.data.user;
     if(authMode==='signup'){
-      await createDefaultWishlist();
       if(pendingShareId){hideAllViews();showPublicView(pendingShareId);}
       else if(pendingUserId){hideAllViews();showProfileView(pendingUserId);}
       else showOnboarding();
@@ -1446,6 +1450,12 @@ async function authSubmit(){
 async function createDefaultWishlist(){
   try{await sb.from('wishlists').insert({name:'Lista libri',icon:'📚',description:null,is_public:false,user_id:currentUser.id,sort_order:0});}
   catch(e){console.log('Default wishlist error',e);}
+}
+async function createDefaultWishlistIfNeeded(){
+  try{
+    const {data}=await sb.from('wishlists').select('id').eq('user_id',currentUser.id).limit(1);
+    if(!data||data.length===0)await createDefaultWishlist();
+  } catch(e){}
 }
 async function logout(){
   await sb.auth.signOut();
@@ -1739,6 +1749,10 @@ function openModal(type){
     setTimeout(()=>{const m=overlayD.querySelector('.modal');if(m)m.scrollTop=0;},50);
   }
 }
+function createWlFromDesire(){
+  closeModal('overlayD');
+  setTimeout(()=>openModal('wishlist'),400);
+}
 function toggleBookFields(){
   isBook=!isBook;
   document.getElementById('bookToggle').classList.toggle('on',isBook);
@@ -1758,8 +1772,13 @@ function clearPrio(){document.querySelectorAll('#overlayD .prio-opt').forEach(x=
 function fillWLSelect(preselect){
   const sel=document.getElementById('dWishlist');
   const opts=wls.map(w=>`<option value="${w.id}"${w.id===preselect?' selected':''}>${w.icon} ${escHtml(w.name)}</option>`).join('');
-  sel.innerHTML=opts+'<option value="__new__">＋ Crea nuova wishlist</option>';
-  sel.onchange=function(){if(this.value==='__new__'){this.value=wls.length?wls[0].id:'';closeModal('overlayD');setTimeout(()=>openModal('wishlist'),200);}};
+  sel.innerHTML=opts;
+  sel.onchange=null;
+  // tasto separato per creare nuova wishlist
+  const newWlBtn=document.getElementById('newWlFromDesireBtn');
+  const newWlBtn2=document.getElementById('newWlBtn2');
+  if(newWlBtn)newWlBtn.style.display=wls.length===0?'block':'none';
+  if(newWlBtn2)newWlBtn2.style.display=wls.length>0?'block':'none';
 }
 function closeModal(id){
   const el=document.getElementById(id);
